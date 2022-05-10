@@ -9,8 +9,8 @@ import WeatherHomeScreen from './src/WeatherHomeScreen'
 import CategoryScreen from './src/CategoryScreen'
 import WeatherDetailScreen from './src/WeatherDetailScreen'
 import ClothesSheetScreen from './src/ClothesSheetScreen';
-import React, {Component} from 'react';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LocationScreen from './src/LocationScreen';
 

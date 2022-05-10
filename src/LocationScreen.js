@@ -10,6 +10,7 @@ import {
 import { useLayoutEffect } from 'react';
 const Stack = createNativeStackNavigator();
 
+
 function LocationScreen({navigation}) {
 
     useLayoutEffect(()=>{
@@ -26,6 +27,7 @@ function LocationScreen({navigation}) {
         <View style={styles.screen}>
           <Text>지역 검색 스크린</Text>
         </View>
+        
       );
     }
     const styles = StyleSheet.create({
