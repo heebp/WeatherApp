@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Table, TableWrapper, Row, Rows, Col } from 'react-native-table-component';
 import {
   StyleSheet,
   Text,
@@ -21,11 +22,6 @@ function ClothesSheetScreen({navigation}) {
           ),
         })
       })
-      return (
-        <View style={styles.screen}>
-          <Text>과거 의상 기록 스크린</Text>
-        </View>
-      );
     }
     const styles = StyleSheet.create({
         screen:{
