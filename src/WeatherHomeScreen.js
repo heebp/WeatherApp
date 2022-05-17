@@ -1,28 +1,34 @@
-import React, {Component, useState} from 'react';
+import React, {Component, useState, useRef} from 'react';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
+  AppRegistry,
   StyleSheet,
-  Text,
+  
   View,
   Button,
   Alert,
   Image,
-  TouchableOpacity
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator
 
 } from 'react-native';
+import { Text } from "@rneui/themed";
 import { useEffect,useLayoutEffect } from 'react';
 import axios from 'axios'
-import CurrentWeather from './WeatherInfo';
 import moment from 'moment';
 import 'moment/locale/ko';
+import { TestScheduler } from 'jest';
+import SQLite from 'react-native-sqlite-storage';
 const Stack = createNativeStackNavigator();
 
 function WeatherHomeScreen({navigation}) {
-
+const scrollviewRef = useRef()
 const [isLoading, setIsLoading] = useState(true);
 const [currentWeather, setCurrentWeather] = useState('');
 const [temp, setTemp] = useState('');
+const [customImages, setCustomImages] = useState('');
 const [windchill, setWindchill] = useState('');
 const [error, setError] = useState(false);
 const [airPollution,setAirPollution] = useState('');
@@ -30,6 +36,22 @@ const API_KEY = "914812757d39d05d77da90e5c6bd8ad2";
 const lat = 38;
 const lon = 128;
 const nowTime = moment().format('YYYY-MM-DD HH:mm:ss');
+const GOOGLE_CUSTOM_API_KEY = "AIzaSyDYXdyEvLH7O0d3NPHxfueSPuZgoc4RKfY";
+const SEARCH_ENGINE = "61faa79a8971472e2";
+const SEARCH_WORD = "청바지 맨투맨";
+const getImage = async () => {
+     const imageSearch = await fetch(
+       `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_CUSTOM_API_KEY}&cx=${SEARCH_ENGINE}&q=${SEARCH_WORD}`
+    );
+ const resimage = await imageSearch.json()
+   // //console.log(resimage.error.code)
+   // //const _image = resimage.items[0].pagemap.cse_image[0].src
+   // //console.log(_image);
+
+
+  setCustomImages(resimage.items)
+ 
+}
 const getWeather = async (lat, lon) => {
   try {
     const resWeather = await axios.get(
@@ -39,7 +61,6 @@ const getWeather = async (lat, lon) => {
     const resPollution = await axios.get(
       `http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`
     );
-    
     let _main = resWeather.data.weather[0].main;
     let _temp = resWeather.data.main.temp;
     let _windchill = resWeather.data.main.feels_like;
@@ -49,6 +70,8 @@ const getWeather = async (lat, lon) => {
     setWindchill(_windchill);
 
     setAirPollution(_airPollution);
+    getData(_temp);
+
   } catch (error) {
     Alert.alert("날씨 정보를 읽어올 수 없습니다.")
     setError(true);
@@ -57,10 +80,61 @@ const getWeather = async (lat, lon) => {
     setIsLoading(false);
   }
 };
+const prevButtonHandler = index => {
+  // scrollviewRef.current.scrollTo({
+  //   x: index * width,
+  //   animation: false
+  // })
+}
+const nextButtonHandler = () => {
 
+}
 
+const [tag, setTag] = useState([]);
+
+const db = SQLite.openDatabase(
+  {
+      name: 'PSP3.db',
+      location: 'default',
+      createFromLocation: 1,
+  },
+  (db) => {
+      console.log('불러오기 성공',);
+  },
+  (error) => {
+      console.log('에러발생: ', error);
+  });
+
+const getData = (temp) => {
+  //console.log(temp)
+  var temperature = Math.round(temp)
+  //console.log(temperatue)
+  try{
+    db.transaction((tx) => {
+      tx.executeSql(`SELECT * FROM clothes_tag WHERE highTemp>`+ temperature+` AND `+ temperature +`>lowTemp;`,[],  (tx, results) => {
+        console.log("aaaaaa");
+        console.log(results)
+          const rows = results.rows;
+          let tag = [];
+          for (let i=0; i<rows.length; i++) {
+              console.log(rows.item(i));
+              tag.push({
+                  ...rows.item(i),
+              });
+          }
+          setTag(tag);
+      },
+      (error)=>{
+        console.log('에러발생',error);
+      });
+    });
+  }catch(error){
+    console.log(error);
+  }
+}
   useEffect(() => {
     getWeather(lat, lon);
+    getImage();
   }, []);
   
   useLayoutEffect(()=>{
@@ -91,36 +165,43 @@ const getWeather = async (lat, lon) => {
           <View style={styles.middle}>
 
             <View style={styles.middlebutton}>
-              <TouchableOpacity>
-                <Text>left</Text>
+              <TouchableOpacity onPress={prevButtonHandler}>
+                <Text>prev</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.cardContainer}>
-              <View style={styles.cardImageContainer}>
-                <Image style={styles.cardImage} source={require('./test.jpg')}/>
-              </View>
+              <ScrollView pagingEnabled horizontal showsHorizontalScrollIndicator={false} ref={scrollviewRef}>
+              {customImages.length === 0 ? (
+                <View>
+                  <ActivityIndicator color="white" style={{ marginTop: 10 }} size="large"/>
+                </View>
+                 ) : (
+                  customImages.map((customImage, index) => (
+                    <View key={index}>
+                      <View style={styles.cardImageContainer}>
+                        <Image style={styles.cardImage} source={customImage.pagemap.cse_image == undefined ? require('./test.jpg') : {uri:customImage.pagemap.cse_image[0].src}}/>
+                      </View>
+                    </View>
+                  ))
+              )}
+              </ScrollView>
             </View>
-          <View style={styles.middlebutton} >
-              <TouchableOpacity >
-                <Text>right</Text>
-              </TouchableOpacity>      
-          </View>
+            <View style={styles.middlebutton} >
+              <TouchableOpacity onPress={nextButtonHandler}>
+                <Text>next</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.bottom}>
             <View style={styles.buttonlayout}>
-            <TouchableOpacity style={styles.button}>
-              <Text>tag</Text>
-            </TouchableOpacity>         
-            <TouchableOpacity style={styles.button}>
-              <Text>tag</Text>
-            </TouchableOpacity>   
-            <TouchableOpacity style={styles.button}>
-              <Text>tag</Text>
-            </TouchableOpacity>   
-            <TouchableOpacity style={styles.button}>
-              <Text>tag</Text>
-            </TouchableOpacity>   
+            {
+            tag.map((item) => (
+              <TouchableOpacity key={item.tagNum} style={styles.button}>
+                <Text key={item.tagNum}>{item.tagName}</Text>
+              </TouchableOpacity>    
+              ))
+            }
             </View>
           </View>
           </>
@@ -136,7 +217,6 @@ const styles = StyleSheet.create({
       flex: 1,
       alignItems: 'center',
       justifyContent: "space-between",
-      margin: 10,
     },
     flexlayout:{
       flexDirection:"row",
@@ -153,8 +233,12 @@ const styles = StyleSheet.create({
       fontSize: 40
     },
     cardImage: {
-      width: 0,
-      height: 0,
+      width: 200,
+      height: 300,
+    },
+    cardImageContainer:{
+      alignItems: 'center', 
+      justifyContent: 'center',
     },
     cardContainer:{
       flex:0.5,

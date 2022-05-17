@@ -19,6 +19,10 @@ target 'WeatherApp' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
+
+  pod 'react-native-sqlite-storage', :path => '../node_modules/react-native-sqlite-storage'
+
   target 'WeatherAppTests' do
     inherit! :complete
     # Pods for testing

@@ -13,11 +13,13 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LocationScreen from './src/LocationScreen';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const Stack = createNativeStackNavigator();
 
 function App() {
   return (
+    <SafeAreaProvider>
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="WeatherHome" component={WeatherHomeScreen} options={{title:'현재 날씨'}}/>
@@ -27,6 +29,7 @@ function App() {
         <Stack.Screen name="Location" component={LocationScreen} options={{title:'지역 검색'}} />
       </Stack.Navigator>
     </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
 

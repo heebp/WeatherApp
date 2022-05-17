@@ -22,6 +22,11 @@ function ClothesSheetScreen({navigation}) {
           ),
         })
       })
+      return(
+        <View>
+          <Text>test</Text>
+        </View>
+      )
     }
     const styles = StyleSheet.create({
         screen:{

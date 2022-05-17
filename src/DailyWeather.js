@@ -20,6 +20,7 @@ const getForecastWeather = async (lat, lon) => {
     `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=alerts,current,minutely,hourly,&appid=${API_KEY}&units=metric`
   );
   const json = await response.json();
+  //console.log(json.daily)
   setDays(json.daily);
 };
   useEffect(() => {
