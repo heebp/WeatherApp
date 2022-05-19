@@ -2,9 +2,7 @@ import React, {Component, useState, useRef} from 'react';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
-  AppRegistry,
   StyleSheet,
-  
   View,
   Button,
   Alert,
@@ -19,37 +17,38 @@ import { useEffect,useLayoutEffect } from 'react';
 import axios from 'axios'
 import moment from 'moment';
 import 'moment/locale/ko';
-import { TestScheduler } from 'jest';
 import SQLite from 'react-native-sqlite-storage';
+import {API_KEY, GOOGLE_CUSTOM_API_KEY, SEARCH_ENGINE} from '@env'
 const Stack = createNativeStackNavigator();
 
 function WeatherHomeScreen({navigation}) {
-const scrollviewRef = useRef()
-const [isLoading, setIsLoading] = useState(true);
-const [currentWeather, setCurrentWeather] = useState('');
-const [temp, setTemp] = useState('');
-const [customImages, setCustomImages] = useState('');
-const [windchill, setWindchill] = useState('');
-const [error, setError] = useState(false);
-const [airPollution,setAirPollution] = useState('');
-const API_KEY = "914812757d39d05d77da90e5c6bd8ad2";
-const lat = 38;
-const lon = 128;
-const nowTime = moment().format('YYYY-MM-DD HH:mm:ss');
-const GOOGLE_CUSTOM_API_KEY = "AIzaSyDYXdyEvLH7O0d3NPHxfueSPuZgoc4RKfY";
-const SEARCH_ENGINE = "61faa79a8971472e2";
-const SEARCH_WORD = "청바지 맨투맨";
-const getImage = async () => {
-     const imageSearch = await fetch(
-       `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_CUSTOM_API_KEY}&cx=${SEARCH_ENGINE}&q=${SEARCH_WORD}`
-    );
- const resimage = await imageSearch.json()
-   // //console.log(resimage.error.code)
-   // //const _image = resimage.items[0].pagemap.cse_image[0].src
-   // //console.log(_image);
+  const scrollviewRef = useRef()
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentWeather, setCurrentWeather] = useState('');
+  const [temp, setTemp] = useState('');
+  const [customImages, setCustomImages] = useState('');
+  const [windchill, setWindchill] = useState('');
+  const [error, setError] = useState(false);
+  const [airPollution,setAirPollution] = useState('');
+  const lat = 38;
+  const lon = 128;
+  const nowTime = moment().format('YYYY-MM-DD HH:mm:ss');
+  //const API_KEY = "914812757d39d05d77da90e5c6bd8ad2";
+ // const GOOGLE_CUSTOM_API_KEY = "AIzaSyDYXdyEvLH7O0d3NPHxfueSPuZgoc4RKfY";
+  //const SEARCH_ENGINE = "61faa79a8971472e2";
+  const SEARCH_WORD = "청바지 맨투맨";
+  const getImage = async (SEARCH_WORD) => {
+  console.log(SEARCH_WORD);
+     //const imageSearch = await fetch(
+     //   `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_CUSTOM_API_KEY}&cx=${SEARCH_ENGINE}&q=${SEARCH_WORD}`
+     //);
+//  const resimage = await imageSearch.json()
+//    // //console.log(resimage.error.code)
+//    // //const _image = resimage.items[0].pagemap.cse_image[0].src
+//    // //console.log(_image);
 
 
-  setCustomImages(resimage.items)
+  // setCustomImages(resimage.items)
  
 }
 const getWeather = async (lat, lon) => {
@@ -104,14 +103,13 @@ const db = SQLite.openDatabase(
   (error) => {
       console.log('에러발생: ', error);
   });
-
 const getData = (temp) => {
   //console.log(temp)
   var temperature = Math.round(temp)
   //console.log(temperatue)
   try{
     db.transaction((tx) => {
-      tx.executeSql(`SELECT * FROM clothes_tag WHERE highTemp>`+ temperature+` AND `+ temperature +`>lowTemp;`,[],  (tx, results) => {
+      tx.executeSql(`SELECT * FROM clothes_tag WHERE highTemp>=`+ temperature+` AND `+ temperature +`>=lowTemp;`,[],  (tx, results) => {
         console.log("aaaaaa");
         console.log(results)
           const rows = results.rows;
@@ -134,7 +132,7 @@ const getData = (temp) => {
 }
   useEffect(() => {
     getWeather(lat, lon);
-    getImage();
+    getImage(SEARCH_WORD);
   }, []);
   
   useLayoutEffect(()=>{
@@ -147,7 +145,9 @@ const getData = (temp) => {
       ),
     })
   })
-
+const test = (test) => {
+  console.log(test)
+}
  return (
     <View style={styles.screen}>
           {isLoading || error
@@ -163,7 +163,6 @@ const getData = (temp) => {
           </View>
           {/* 수정중 */}
           <View style={styles.middle}>
-
             <View style={styles.middlebutton}>
               <TouchableOpacity onPress={prevButtonHandler}>
                 <Text>prev</Text>
@@ -197,7 +196,7 @@ const getData = (temp) => {
             <View style={styles.buttonlayout}>
             {
             tag.map((item) => (
-              <TouchableOpacity key={item.tagNum} style={styles.button}>
+              <TouchableOpacity key={item.tagNum} style={styles.button} onPress={()=> getImage(item.tagName)}>
                 <Text key={item.tagNum}>{item.tagName}</Text>
               </TouchableOpacity>    
               ))
@@ -205,7 +204,6 @@ const getData = (temp) => {
             </View>
           </View>
           </>
-
         ) 
       }
     </View>

@@ -1,6 +1,5 @@
 import React, {Component, useState} from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
 import {
   StyleSheet,
   Text,
@@ -8,11 +7,11 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useEffect } from 'react';
+import {API_KEY} from '@env'
 const Stack = createNativeStackNavigator();
 
 function DailyWeather() {
 const [days, setDays] = useState([]);
-const API_KEY = "914812757d39d05d77da90e5c6bd8ad2";
 const lat = 38;
 const lon = 128;
 const getForecastWeather = async (lat, lon) => {
@@ -45,7 +44,7 @@ const getForecastWeather = async (lat, lon) => {
                <Text style={styles.description}>{day.weather[0].main}</Text>
                <Text style={styles.description}>{parseInt(day.temp.max)}</Text>
                <Text style={styles.description}>{parseInt(day.temp.min)}</Text>
-               <Text style={styles.description}>{day.rain == undefined ? "0mm":day.rain*100+"mm"}</Text>
+               <Text style={styles.description}>{day.rain == undefined ? "0mm":Math.round(day.rain*100)+"mm"}</Text>
              </View>
            ))
         }

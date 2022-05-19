@@ -7,10 +7,9 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useEffect } from 'react';
-
+import {API_KEY} from '@env'
 function HourlyWeather() {
 const [hours, setHours] = useState([]);
-const API_KEY = "914812757d39d05d77da90e5c6bd8ad2";
 const lat = 38;
 const lon = 128;
 const test = "true"
@@ -43,7 +42,7 @@ const getForecastWeather = async (lat, lon) => {
               <Text style={styles.tinytext}>{hour.weather[0].main}</Text>
               <Text style={styles.tinytext}>{parseInt(hour.temp)}</Text>
               {/* <Text style={styles.tinytext}>{hour.weather[0].description}</Text> */}
-              <Text style={styles.tinytext}>{hour.rain == undefined ? '0mm' : 'test'}</Text>
+              <Text style={styles.tinytext}>{hour.rain == undefined ? '0mm' : Math.round(hour.rain*100)+"mm"}</Text>
             </View>
 
           ))
