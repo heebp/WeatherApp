@@ -34,22 +34,19 @@ function WeatherHomeScreen({navigation}) {
   const lat = 38;
   const lon = 128;
   const nowTime = moment().format('YYYY-MM-DD HH:mm:ss');
-  //const API_KEY = "914812757d39d05d77da90e5c6bd8ad2";
- // const GOOGLE_CUSTOM_API_KEY = "AIzaSyDYXdyEvLH7O0d3NPHxfueSPuZgoc4RKfY";
-  //const SEARCH_ENGINE = "61faa79a8971472e2";
   const SEARCH_WORD = "청바지 맨투맨";
   const getImage = async (SEARCH_WORD) => {
-  console.log(SEARCH_WORD);
-     //const imageSearch = await fetch(
-     //   `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_CUSTOM_API_KEY}&cx=${SEARCH_ENGINE}&q=${SEARCH_WORD}`
-     //);
-//  const resimage = await imageSearch.json()
+  //console.log(SEARCH_WORD);
+     const imageSearch = await fetch(
+        `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_CUSTOM_API_KEY}&cx=${SEARCH_ENGINE}&q=${SEARCH_WORD}`
+     );
+    const resimage = await imageSearch.json()
 //    // //console.log(resimage.error.code)
 //    // //const _image = resimage.items[0].pagemap.cse_image[0].src
 //    // //console.log(_image);
 
 
-  // setCustomImages(resimage.items)
+  setCustomImages(resimage.items)
  
 }
 const getWeather = async (lat, lon) => {
