@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { useEffect } from 'react';
 import {API_KEY} from '@env'
+
 function HourlyWeather() {
 const [hours, setHours] = useState([]);
 const lat = 38;

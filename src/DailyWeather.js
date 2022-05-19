@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { useEffect } from 'react';
 import {API_KEY} from '@env'
+
 const Stack = createNativeStackNavigator();
 
 function DailyWeather() {
