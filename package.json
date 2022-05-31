@@ -17,15 +17,21 @@
     "axios": "^0.26.1",
     "moment": "^2.29.3",
     "react": "17.0.2",
+    "react-geocode": "^0.2.3",
+    "react-live-clock": "^5.10.0",
     "react-moment": "^1.1.2",
     "react-native": "0.68.0",
     "react-native-config": "^1.4.5",
     "react-native-dotenv": "^3.3.1",
+    "react-native-geolocation-service": "^5.3.0-beta.4",
+    "react-native-google-places-autocomplete": "^2.4.1",
+    "react-native-maps": "^0.31.1",
     "react-native-safe-area-context": "^4.2.5",
     "react-native-screens": "^3.13.1",
     "react-native-sqlite-storage": "^6.0.1",
     "react-native-table-component": "^1.2.2",
-    "react-native-vector-icons": "^9.1.0"
+    "react-native-vector-icons": "^9.1.0",
+    "react-use": "^17.4.0"
   },
   "devDependencies": {
     "@babel/core": "7.17.9",
