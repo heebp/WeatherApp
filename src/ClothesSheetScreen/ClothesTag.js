@@ -16,17 +16,18 @@ import Dialog from "react-native-dialog";
 import { DBContext } from '../Context/DataBase';
 
 function ClothesTag(props){
-    const [categoryBGC, setCategoryBGC]=useState('lightgrey')
+    let checked = 'yellow'
+    let notChecked = 'lightgrey'
     const [categoryName,setCategoryName] = useState('상의')
     const nextId = useRef(100);
     const db = useContext(DBContext)
     const [forceRender, setForceRender] =useState(false);
     const [clothesTag, setClothesTag] = useState([]);
     const [clothesTagInput, setClothesTagInput] = useState('');
-    const [tagClick, setTagClick] = useState(false)
-    const [isChecked, setChecked] = useState(true); // 카테고리 체크
-    const [isChecked2, setChecked2] = useState(false);
-    const [isChecked3, setChecked3] = useState(false);
+    const [tagClick, setTagClick] = useState(false) // consider 카테고리처럼 색으로 true false 지정하기
+    const [isChecked, setChecked] = useState(checked); // 카테고리 체크
+    const [isChecked2, setChecked2] = useState(notChecked);
+    const [isChecked3, setChecked3] = useState(notChecked);
     const [visible, setVisible] = useState(false);
 
     const showDialog = () => {
@@ -74,26 +75,26 @@ function ClothesTag(props){
       const handleTagCategory=(cateName)=>{
         if(cateName=='상의'){
           setCategoryName("상의")
-          setChecked(true,'yellow');setChecked2(false,'lightgrey');setChecked3(false,'lightgrey')
+          setChecked(checked);setChecked2(notChecked);setChecked3(notChecked)
         }else if(cateName=="하의"){
           setCategoryName("하의")
-          setChecked(false,'lightgrey');setChecked2(true,'yellow');setChecked3(false,'lightgrey')
+          setChecked(notChecked);setChecked2(checked);setChecked3(notChecked)
         }else{
           setCategoryName("겉옷")
-          setChecked(false,'lightgrey');setChecked2(false,'lightgrey');setChecked3(true,'yellow')
+          setChecked(notChecked);setChecked2(notChecked);setChecked3(checked)
         }
     
       }
       const renderItem = ({ item, index }) => (
-      (isChecked===true && item.categoryName==="상의")?(
+      (isChecked==checked && item.categoryName==="상의")?(
       <TouchableOpacity style={{ alignItems:"center", marginTop:10, marginLeft:20, width:60,borderRadius:100, backgroundColor: item.backgroundColor}} key={item.id} onPress={()=>{handleTagClick(item)}}>
         <Text>{item.tagName}</Text>
       </TouchableOpacity>
-      ):((isChecked2===true && item.categoryName==="하의")?(
+      ):((isChecked2==checked && item.categoryName==="하의")?(
         <TouchableOpacity style={{ alignItems:"center", marginTop:10, marginLeft:20, width:60,borderRadius:100, backgroundColor: item.backgroundColor}} key={item.id} onPress={()=>{handleTagClick(item)}}>
         <Text>{item.tagName}</Text>
       </TouchableOpacity>
-      ):((isChecked3==true && item.categoryName==="겉옷")?(
+      ):((isChecked3==checked && item.categoryName==="겉옷")?(
         <TouchableOpacity style={{ alignItems:"center", marginTop:10, marginLeft:20, width:60,borderRadius:100, backgroundColor: item.backgroundColor}} key={item.id} onPress={()=>{handleTagClick(item)}}>
         <Text>{item.tagName}</Text>
       </TouchableOpacity>
@@ -112,15 +113,15 @@ function ClothesTag(props){
         <View>
             <View style={{flexDirection:"row", alignSelf:"flex-start", margin:10}}>
 
-          <TouchableOpacity style={{width:45, height:30, borderWidth:1, alignItems:'center',justifyContent:"center", backgroundColor:categoryBGC,}} onPress={()=>handleTagCategory("상의")}>
+          <TouchableOpacity style={{width:45, height:30, borderWidth:1, alignItems:'center',justifyContent:"center", backgroundColor:isChecked,}} onPress={()=>handleTagCategory("상의")}>
             <Text>상의</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={{width:45, height:30, borderWidth:1, alignItems:'center',justifyContent:"center",  backgroundColor:categoryBGC,}} onPress={()=>handleTagCategory("하의")}>
+          <TouchableOpacity style={{width:45, height:30, borderWidth:1, alignItems:'center',justifyContent:"center",  backgroundColor:isChecked2,}} onPress={()=>handleTagCategory("하의")}>
             <Text>하의</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={{width:45, height:30,  borderWidth:1, alignItems:'center',justifyContent:"center", backgroundColor:categoryBGC,}} onPress={()=>handleTagCategory("겉옷")}>
+          <TouchableOpacity style={{width:45, height:30,  borderWidth:1, alignItems:'center',justifyContent:"center", backgroundColor:isChecked3,}} onPress={()=>handleTagCategory("겉옷")}>
             <Text>겉옷</Text>
           </TouchableOpacity>
 
@@ -142,13 +143,12 @@ function ClothesTag(props){
         </Dialog.Container> 
 
           <FlatList
-            style={{alignSelf:'flex-start'}}
             key={'#'}
             data={clothesTag}
             renderItem={renderItem}
             // keyExtractor={(sheet) => sheet.id}
              numColumns={4}
-         />
+          />
         </View>
     )
 }
