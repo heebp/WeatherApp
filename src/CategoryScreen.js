@@ -23,13 +23,13 @@ function CategoryScreen({navigation}){
           </TouchableOpacity>
         </View>
         <View style={styles.case3}>
-          <TouchableOpacity onPress={()=> navigation.navigate('ClothesSheet')}>
+          <TouchableOpacity onPress={()=> navigation.navigate('SheetList')}>
             <Text>의상 기록</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.case4}>
           <TouchableOpacity onPress={()=> navigation.navigate('Location')}>
-            <Text>지역 검색</Text>
+            <Text>위치 설정</Text>
           </TouchableOpacity>
         </View>
 
