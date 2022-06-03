@@ -15,7 +15,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { CurrentLocation } from './src/Context/CurrentLocation';
+import { DataBase } from './src/Context/DataBase';
 import { CurrentWeather } from './src/Context/CurrentWeather';
+
+import SheetListScreen from './src/ClothesSheetScreen/SheetListScreen';
 const Stack = createNativeStackNavigator();
 
 function App() {
@@ -24,17 +27,21 @@ function App() {
     <SafeAreaProvider>
       <CurrentLocation>
         <CurrentWeather> 
+          <DataBase>
           <NavigationContainer>
             <Stack.Navigator>
-              <Stack.Screen name="WeatherHome" component={WeatherHomeScreen} options={{title:'현재 날씨'}}/>
+              <Stack.Screen name="WeatherHome" component={WeatherHomeScreen} options={{title:'\t\t현재 날씨'}}/>
               <Stack.Screen name="Category" component={CategoryScreen} />
-              <Stack.Screen name="WeatherDetail" component={WeatherDetailScreen} options={{title:'상세 날씨'}} />
-              <Stack.Screen name="ClothesSheet" component={ClothesSheetScreen} options={{title:'의상 기록'}} />
-              <Stack.Screen name="Location" component={LocationScreen} options={{title:'위치 설정'}} />
+              <Stack.Screen name="WeatherDetail" component={WeatherDetailScreen} options={{title:'\t\t상세 날씨'}} />
+              <Stack.Screen name="SheetList" component={SheetListScreen} options={{title:'\t\t의상 기록 리스트'}} />
+              <Stack.Screen name="ClothesSheet" component={ClothesSheetScreen} options={{title:'\t\t의상 기록'}} />
+              <Stack.Screen name="Location" component={LocationScreen} options={{title:'\t\t위치 설정'}} />
             </Stack.Navigator>
           </NavigationContainer>
+          </DataBase>
          </CurrentWeather> 
       </CurrentLocation>
+
     </SafeAreaProvider>
   );
 }
