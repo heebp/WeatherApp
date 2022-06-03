@@ -14,16 +14,20 @@ import Geocode from 'react-geocode'
 import { useLayoutEffect } from 'react';
 import { LocationContext } from '../Context/CurrentLocation';
 import {API_KEY, GOOGLE_CUSTOM_API_KEY, SEARCH_ENGINE} from '@env'
+import { DBContext } from '../Context/DataBase';
 Geocode.setApiKey(GOOGLE_CUSTOM_API_KEY)
-Geocode.setLanguage('en')
+Geocode.setLanguage('ko')
 Geocode.setRegion('es')
 Geocode.enableDebug()
 const Stack = createNativeStackNavigator();
 
+
 function LocationScreen({navigation}) {
+  const db = useContext(DBContext)
   const mapRef = useRef(null);
   const location = useContext(LocationContext)
   const [searchLocation,setSearchLocation] = useState(location)
+  const [markerLocation,setMarkerLocation] = useState(location)
   const [searchWord, setSearchWord] = useState('검색');
 
   function getGeocoding(searchWord){
@@ -34,40 +38,49 @@ function LocationScreen({navigation}) {
       const latt = response.results[0].geometry.location;
       console.log(response.results[0].address_components);
       console.log(response.results[0].geometry.location);
+      console.log(response.results[0].geometry.location);
       console.log(response);
       console.log("test"+latt.lat +"lon"+ latt.lng);
-      setSearchLocation(latt);
-      mapRef.current.animateToRegion({
-        latitude : searchLocation.lat,
-        longitude : searchLocation.lng
-      })
+      //setSearchLocation(latt);
+      setMarkerLocation(latt);
+       mapRef.current.animateToRegion({
+         latitude : latt.lat,
+         longitude : latt.lng,
+         latitudeDelta: 0.0922,
+         longitudeDelta: 0.0421,
+       })
     },
     error => {
       console.error(error);
     }
   );
   }
-
   console.log(location)
+  function createMarker(coordinate){
+    const marker={"lat":coordinate.latitude,"lng":coordinate.longitude}
+    setMarkerLocation(marker)
+  }
     useLayoutEffect(()=>{
         navigation.setOptions({
           headerLeft: () => (
-            <Button
+            <TouchableOpacity
             title="Category"
-            onPress={ () => navigation.navigate('Category')}
-          />
-          ),
+            onPress={ () => navigation.navigate('Category')}>
+              <Image source={ require('../images/categoryButton.png') } style={ { width: 30, height: 30, } } />
+            </TouchableOpacity>
+          )
         })
       })
-      useEffect(()=>{
-      },[])
+
       return(
         <View style={{width: "100%", height: "100%"}}>
-          <View style={{flexDirection:'row', margin: 5, alignItems:'center', justifyContent:'center', borderWidth:2, borderColor:'#888', borderRadius:10, backgroundColor:'#fff'}}>
-            <View style={{flex:4}}>  
+          <View style={{flexDirection:'row', margin: 5,  borderWidth:2, borderColor:'#888', borderRadius:10, backgroundColor:'#fff'}}>
+            <View style={{flex:4, }}>  
               <TextInput
                     style={{
-
+                      position:'absolute',
+                      justifyContent:'flex-start',
+                      alignItems:'flex-start'
                     }}
                     onChangeText={(value)=>{
                       setSearchWord(value)
@@ -79,46 +92,50 @@ function LocationScreen({navigation}) {
                     placeholderTextColor={'#666'}
                 />
             </View>
-            <View style={{flex:1}}>
-              <TouchableOpacity onPress={() => getGeocoding(searchWord)}>
-                <Image source={ require('../images/searchImage.png') } style={ { width: 40, height: 40 } } />
+            <View style={{flex:1, }}>
+              <TouchableOpacity style={{alignItems:'flex-end'}} onPress={() => getGeocoding(searchWord)}>
+                <Image source={ require('../images/searchImage.png') } style={ { width: 45, height: 45, } } />
               </TouchableOpacity>
             </View>
           </View>
           <MapView
             ref ={mapRef} 
             style={{flex: 1}}
+            initialRegion={{
+              latitude: searchLocation.lat, 
+              longitude: searchLocation.lng,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}
+            /*
             region={{
               latitude: searchLocation.lat, 
               longitude: searchLocation.lng,
               latitudeDelta: 0.0922,
               longitudeDelta: 0.0421,
             }}
-            
-            /*
-            onRegionChange={region => {
-              setChangedLocation({
-                latitude: region.latitude,
-                longitude: region.longitude,
-              });
-            }}
-            
-            onRegionChangeComplete={region => {
-              setChangedLocation({
-                latitude: region.latitude,
-                longitude: region.longitude,
-              });
-            }}
             */
-            showsUserLocation={true}
-            >
+            //onRegionChange={onRegionChange}           
+            onRegionChange={region => {
+              setSearchLocation(region);
+            }}         
+            onRegionChangeComplete={region => {
+              setSearchLocation(region)
+            }}          
+            onPress={(event)=>createMarker(event.nativeEvent.coordinate)}
+            showsUserLocation={true}      >
             <Marker
               coordinate={{
-                latitude: searchLocation.lat,
-                longitude: searchLocation.lng
+                latitude: markerLocation.lat,
+                longitude: markerLocation.lng
               }}
             />
           </MapView>
+          <View style={{position:'absolute',  top: '86%',  alignSelf: 'center',justifyContent:'center' }}>
+              <TouchableOpacity style={{justifyContent:'center', backgroundColor:'black',borderRadius:100,width:300,height:40}}onPress={() => console.log("test")}>
+                <Text style={{fontWeight:"800",fontSize:15,color:'white',alignSelf: 'center'}}>위치 저장</Text>
+              </TouchableOpacity>
+            </View>
         </View>
       )
     }
