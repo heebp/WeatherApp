@@ -1,26 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useContext } from 'react';
 import { TouchableOpacity, StyleSheet, Text } from 'react-native';
-import SQLite from 'react-native-sqlite-storage';
+import { DBContext } from '../Context/DataBase';
 
 function GetTag(props){
+    const db = useContext(DBContext)
+
     console.log("GetTag 실행")
     const [tag, setTag] = useState([]);
     const [temperature, setTemperature] = useState(10);
     /*
     db 분리 필요
     */
-    const db = SQLite.openDatabase(
-    {
-        name: 'PSP3.db',
-        location: 'default',
-        createFromLocation: 1,
-    },
-    (db) => {
-        console.log('불러오기 성공',);
-    },
-    (error) => {
-        console.log('에러발생: ', error);
-    });
+
     //props 사용 불가능
     //-> Conte APi 사용
     const getData = (temp) => {
