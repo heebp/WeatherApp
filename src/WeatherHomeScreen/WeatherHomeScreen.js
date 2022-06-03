@@ -6,6 +6,7 @@ import {
   Button,
   TouchableOpacity,
   ScrollView,
+  Image,
 } from 'react-native';
 import { Text } from "@rneui/themed";
 import { useEffect,useLayoutEffect } from 'react';
@@ -45,10 +46,11 @@ const nextButtonHandler = () => {
   useLayoutEffect(()=>{
     navigation.setOptions({
       headerLeft: () => (
-        <Button
+        <TouchableOpacity
         title="Category"
-        onPress={ () => navigation.navigate('Category')}
-      />
+        onPress={ () => navigation.navigate('Category')}>
+          <Image source={ require('../images/categoryButton.png') } style={ { width: 30, height: 30, } } />
+        </TouchableOpacity>
       ),
     })
   })

@@ -7,7 +7,9 @@ import {
   View,
   ActivityIndicator,
   Button,
-  Alert
+  Alert,
+  TouchableOpacity,
+  Image,
 } from 'react-native';
 import { useLayoutEffect,useEffect } from 'react';
 import HourlyWeather from './HourlyWeather';
@@ -19,10 +21,11 @@ function WeatherDetailScreen({navigation}) {
     useLayoutEffect(()=>{
         navigation.setOptions({
           headerLeft: () => (
-            <Button
+            <TouchableOpacity
             title="Category"
-            onPress={ () => navigation.navigate('Category')}
-          />
+            onPress={ () => navigation.navigate('Category')}>
+              <Image source={ require('../images/categoryButton.png') } style={ { width: 30, height: 30, } } />
+            </TouchableOpacity>
           ),
         })
       })
