@@ -18,18 +18,20 @@ import { DBContext } from '../Context/DataBase';
 function ClothesTag(props){
     let checked = 'yellow'
     let notChecked = 'lightgrey'
+    const firstRender= useRef(true);
+    //console.log(props.value.date)
     const [categoryName,setCategoryName] = useState('상의')
     const nextId = useRef(100);
     const db = useContext(DBContext)
     const [forceRender, setForceRender] =useState(false);
     const [clothesTag, setClothesTag] = useState([]);
     const [clothesTagInput, setClothesTagInput] = useState('');
-    const [tagClick, setTagClick] = useState(false) // consider 카테고리처럼 색으로 true false 지정하기
+    const [tagClick, setTagClick] = useState(false) // 개선점? : 카테고리처럼 색으로 true false 지정
     const [isChecked, setChecked] = useState(checked); // 카테고리 체크
     const [isChecked2, setChecked2] = useState(notChecked);
     const [isChecked3, setChecked3] = useState(notChecked);
     const [visible, setVisible] = useState(false);
-
+    const [forceRender2, setForceRender2] =useState(false);
     const showDialog = () => {
         setVisible(true);
       };
@@ -48,22 +50,40 @@ function ClothesTag(props){
           setForceRender(false);
         }
       }
-      const handleAdd = () => {
+      const handleAdd = (item) => {
+        //setForceRender2(false)
+        var tag
+        if(item!=undefined){
+           tag = {
+            id: nextId.current,
+            tagName:item.tagName,
+            categoryName:item.categoryName,
+            click:tagClick,
+            backgroundColor:'darkgray'
+          }
 
-        const tag = {
-          id: nextId.current,
-          tagName:clothesTagInput,
-          categoryName:categoryName,
-          click:tagClick,
-          backgroundColor:'darkgray'
+        }else{
+           tag = {
+            id: nextId.current,
+            tagName:clothesTagInput,
+            categoryName:categoryName,
+            click:tagClick,
+            backgroundColor:'darkgray'
+          }
         }
+        
+        setVisible(false);
+
 
         setClothesTag(clothesTag=>[...clothesTag, tag])
         setClothesTagInput('');
         nextId.current += 1;
-        setVisible(false);
-        //console.log("하위"+clothesTag)
-        //confirmTag(clothesTag)
+        /*
+        //비동기 호출 오류? -> useEffect 사용
+        console.log("하위"+clothesTag)
+        confirmTag(clothesTag)
+        */
+
       };
       const handleDeleteTag = () =>{
         setClothesTag(clothesTag.filter((clothesTag)=> clothesTag.click !== true ));
@@ -87,27 +107,58 @@ function ClothesTag(props){
       }
       const renderItem = ({ item, index }) => (
       (isChecked==checked && item.categoryName==="상의")?(
-      <TouchableOpacity style={{ alignItems:"center", marginTop:10, marginLeft:20, width:60,borderRadius:100, backgroundColor: item.backgroundColor}} key={item.id} onPress={()=>{handleTagClick(item)}}>
+      <TouchableOpacity style={{ alignItems:"center", marginTop:10, marginLeft:10, width:60,borderRadius:100, margin:10, backgroundColor: item.backgroundColor}} key={item.id} onPress={()=>{handleTagClick(item)}}>
         <Text>{item.tagName}</Text>
       </TouchableOpacity>
       ):((isChecked2==checked && item.categoryName==="하의")?(
-        <TouchableOpacity style={{ alignItems:"center", marginTop:10, marginLeft:20, width:60,borderRadius:100, backgroundColor: item.backgroundColor}} key={item.id} onPress={()=>{handleTagClick(item)}}>
+        <TouchableOpacity style={{ alignItems:"center", marginTop:10, marginLeft:10, width:60,borderRadius:100, margin:10, backgroundColor: item.backgroundColor}} key={item.id} onPress={()=>{handleTagClick(item)}}>
         <Text>{item.tagName}</Text>
       </TouchableOpacity>
       ):((isChecked3==checked && item.categoryName==="겉옷")?(
-        <TouchableOpacity style={{ alignItems:"center", marginTop:10, marginLeft:20, width:60,borderRadius:100, backgroundColor: item.backgroundColor}} key={item.id} onPress={()=>{handleTagClick(item)}}>
+        <TouchableOpacity style={{ alignItems:"center", marginTop:10, marginLeft:10, width:60,borderRadius:100, margin:10, backgroundColor: item.backgroundColor}} key={item.id} onPress={()=>{handleTagClick(item)}}>
         <Text>{item.tagName}</Text>
       </TouchableOpacity>
       ):(
         <View></View>
       )))
       );
+      const loadTag=()=>{
+        // 렌더링 해제
+        setForceRender2(true)
+        console.log("로드 태그")
+        db.transaction((tx) => {
+          tx.executeSql(`SELECT * FROM clothes_tag 
+          join sheet_tag on clothes_tag.tagNum = sheet_tag.tagNum WHERE date='`+props.value.date+`'`,
+          [],
+            (tx, results) => {
+              console.log("셀렉트 옷 태그 log:");
+              console.log(results)
+              const rows = results.rows;
+              console.log("셀렉트 옷 태그 log:"+rows.length);
+                for (let i=0; i<rows.length; i++) {
+                  console.log(rows.item(i));
+                  handleAdd(rows.item(i))
+                }
+
+            },
+          (error)=>{
+            console.log('에러발생',error);
+          });
+        });
+      }
+    //상위 컴포넌트에 값 전달
     const confirmTag=(clothesTag)=>{
         //console.log("하위"+clothesTag)
         props.propfunction(clothesTag)
     }
     useEffect(()=>{
-      confirmTag(clothesTag)
+      //db 마운트할 때 state값 로딩 -> 무한 렌더링
+      //forcerender2 설정 -> db 마운트시에만 렌더링 
+      if(forceRender2==false){
+        loadTag()
+      }else{
+        confirmTag(clothesTag)
+      }
     },[clothesTag])
     return(
         <View>

@@ -23,6 +23,8 @@ function SheetList({navigation}) {
   const [value, setValue] = useState(null);
   const [selectedEmail, setSelectedEmail] = useState('');
   const [sheet, setSheet] = useState([]);
+  const [catags, setCatags] = useState([])
+  
   useLayoutEffect(()=>{
     navigation.setOptions({
       headerLeft: () => (
@@ -37,23 +39,26 @@ function SheetList({navigation}) {
 
   const loadSheet=()=>{
     db.transaction((tx) => {
-      tx.executeSql(`SELECT * FROM clothes_sheet`,
+      tx.executeSql(`SELECT clothes_sheet.date, weather,group_concat(categoryName) categories,group_concat(tagName) tags,temperature,windchill,memo FROM clothes_sheet 
+      LEFT JOIN sheet_tag on clothes_sheet.date = sheet_tag.date 
+      LEFT JOIN clothes_tag on clothes_tag.tagNum = sheet_tag.tagNum 
+      GROUP BY clothes_sheet.date
+      `,
       [],
         (tx, results) => {
           console.log("조회 log:"+results);
           const rows = results.rows;
           console.log("조회 log:"+rows.length);
-          let tag = [];
+          let temp = [];
             for (let i=0; i<rows.length; i++) {
               console.log(rows.item(i));
-              tag.push({
+              temp.push({
                 ...rows.item(i),
                 i
               });
-
-              }
-        setSheet(tag)
-        console.log("시트"+sheet)
+            }
+        setSheet(temp)
+        //console.log(sheet)
         },
       (error)=>{
         console.log('에러발생',error);
@@ -70,11 +75,15 @@ const renderItem = ({ item, index }) => (
   {/* <Text>{item.i}</Text> */}
     <Text>날짜 : {item.date}</Text>
     <Text >날씨 : {item.weather}</Text>
-    <Text >기온:{item.temperature}</Text>
+    <Text >기온 : {item.temperature}</Text>
     <Text >체감온도 : {item.windchill}</Text>
-    <Text>상의 : </Text>
+    <Text> 태그 : {item.tags}</Text>
+{/* 
+    ------------db값 spilit()함수 적용안됨------------ 
+    <Text>상의 : {item.tags}</Text>
     <Text >하의 : </Text>
     <Text >겉옷 : </Text>
+*/}
     <Text >오늘의 메모 : {item.memo}</Text>
     <StatusBar  style="black"/>
   </TouchableOpacity> 
