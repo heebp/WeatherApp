@@ -37,9 +37,7 @@ export const CurrentWeather = (props)=>{
          setCurrentWeather(_main);
          setTemp(_temp);
          setWindchill(_windchill);
-
          setAirPollution(_airPollution);
-        console.log("getWeather 실행 끝끝끝끝끝끝끝끝끝끝끝끝끝")
       } catch (error) {
         console.log(error);
          setError(true);

@@ -48,7 +48,7 @@ export const CurrentLocation = (props)=>{
       }, []);
       
     return(
-        <LocationContext.Provider value={{lat,lng}}>
+        <LocationContext.Provider value={{lat,lng,setlatitude,setlongitude}}>
             {props.children}
         </LocationContext.Provider>
     )
