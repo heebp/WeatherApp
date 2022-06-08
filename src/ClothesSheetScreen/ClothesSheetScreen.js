@@ -1,5 +1,5 @@
 import React, { useContext, useState,useEffect,useRef} from 'react';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { NavigationContainer, useNavigation,useIsFocused } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
   StyleSheet,
@@ -13,25 +13,25 @@ import {
   FlatList,
   ScrollView
 } from 'react-native';
-import { useLayoutEffect } from 'react';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import { WeatherContext } from '../Context/CurrentWeather';
 import moment from 'moment';
 import { DBContext } from '../Context/DataBase';
 import ClothesTag from './ClothesTag';
+import WeatherIcon from '../WeatherIcon';
+import ClothesImage from './ClothesImage';
 const Stack = createNativeStackNavigator();
 
 function ClothesSheetScreen({route, navigation}) {
+  const isFocused = useIsFocused();
   const db = useContext(DBContext)
   const {item} = route.params
-  //console.log("아이템")
-  //console.log(item)
+  console.log(item)
   const weather = useContext(WeatherContext);
   const nowTime = moment().format('YYYY/MM/DD');
   const [memo, setMemo] = useState('오늘의 메모');
   const [image, setImage] = useState(null); // 이미지 삽입
   const [tags, setTags] = useState() 
-
-  
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -51,11 +51,8 @@ function ClothesSheetScreen({route, navigation}) {
     try{
       //의상 기록 저장
       db.transaction((tx) => {
-        tx.executeSql(`INSERT INTO clothes_sheet(date,weather,temperature,windchill,memo) VALUES(?,?,?,?,?);`,[nowTime.toString().substring(0,10)
-        ,weather.currentWeather
-       ,Math.round(weather.temp)
-       ,Math.round(weather.windchill)
-        ,memo],
+        tx.executeSql(`INSERT INTO clothes_sheet(date,weather,temperature,windchill,memo) VALUES(?,?,?,?,?);`,
+        [nowTime.toString().substring(0,10),weather.currentWeather,Math.round(weather.temp),Math.round(weather.windchill),memo],
         //INSERT INTO clothes_sheet_image(date,image) VALUES(`+nowTime.toString().substring(0,16)+`,`+image+`);
           (tx, results) => {
           inserClothesTag()
@@ -90,7 +87,7 @@ function ClothesSheetScreen({route, navigation}) {
         tx.executeSql(`UPDATE clothes_sheet SET memo ='`+memo+`' where date='`+item.date+`';`,
         [],
           (tx, results) => {
-            //console.log(tags.length)
+
             inserClothesTag()
           alert('저장되었습니다.')
         },
@@ -101,8 +98,6 @@ function ClothesSheetScreen({route, navigation}) {
     }catch(error){
       console.log(error);
     }
-
-
   }
 
   const inserClothesTag=()=>{
@@ -114,10 +109,6 @@ function ClothesSheetScreen({route, navigation}) {
           tx.executeSql(`INSERT INTO clothes_tag(tagName,categoryName) VALUES(?,?)`,
           [tags[j].tagName,tags[j].categoryName],
             (tx, results) => {
-              console.log("조회 log\n");
-              console.log(results)
-              console.log("//////")
-              //console.log(results.insertId)
               insertSheetTag(results.insertId)
             },
           (error)=>{
@@ -143,9 +134,7 @@ function ClothesSheetScreen({route, navigation}) {
         tx.executeSql(`INSERT INTO sheet_tag(date,tagNum) VALUES(?,?)`,
         [date,tagNum],
           (tx, results) => {
-            console.log("조회 log\n");
-            console.log(results)
-            console.log("//////")
+
           },
         (error)=>{
           console.log('에러발생',error);
@@ -186,39 +175,34 @@ function ClothesSheetScreen({route, navigation}) {
 
   useEffect(() => {
     //저장된 db가 있다면 -< db memo을 initialize
-    if(item!=-1)
+    if(item!=-1){
       setMemo(item.memo)
-    console.log("useEffect")
-    //console.log(tags)
-  }, []);
+    }
 
-  useLayoutEffect(()=>{
-    navigation.setOptions({
-      headerLeft: () => (
-        <TouchableOpacity
-        title="Category"
-        onPress={ () => navigation.navigate('Category')}>
-          <Image source={ require('../images/categoryButton.png') } style={ { width: 30, height: 30, } } />
-        </TouchableOpacity>
-      ),
-    })
-  })
+  }, [item]);
+
   return(
-    <View style={{ flex: 1, alignItems: 'center'}}>
+    <View style={{ flex: 1}}>
       <View style={{ width:"90%", backgroundColor:"lightgray",margin:10}}>
       {item === -1 ? (
         <View style={{ alignSelf:"flex-start", margin:10}}>
           <Text>날짜 : {nowTime} </Text>
-          <Text>{"\n"}날씨 : {weather.currentWeather}</Text>
-          <Text>{ "\n"}온도 : {Math.round(weather.temp)}도</Text>
-          <Text>{ "\n"}체감온도 :{Math.round(weather.windchill)}도</Text>
+          <Text>날씨 : 
+            <WeatherIcon value={weather.currentWeather} style={{}}/>
+            {/*weather.currentWeather*/}
+          </Text>
+          <Text>온도 : {Math.round(weather.temp)}도</Text>
+          <Text>체감온도 :{Math.round(weather.windchill)}도</Text>
         </View>
       ):(
         <View style={{ alignSelf:"flex-start", margin:10}}>
           <Text>날짜 : {item.date} </Text>
-          <Text>{"\n"}날씨 : {item.weather}</Text>
-          <Text>{ "\n"}온도 : {item.temperature}도</Text>
-          <Text>{ "\n"}체감온도 :{item.windchill}도</Text>
+          <Text>날씨 : 
+            <WeatherIcon value={item.weather}/>
+            {/*item.weather*/}
+          </Text>
+          <Text>온도 : {item.temperature}도</Text>
+          <Text>체감온도 :{item.windchill}도</Text>
         </View>
         )
       }
@@ -226,7 +210,9 @@ function ClothesSheetScreen({route, navigation}) {
       <View style={{ width:"90%",height:"40%", backgroundColor:"lightgray",margin:10}}>
         <ClothesTag value={item} propfunction={highfunction}/>
       </View>
-
+      <View>
+        <ClothesImage/>
+      </View>
     {/*     
     <Button title="사진 불러오기" onPress={pickImage} />
     {image && <Image source={{ uri: image }} style={{ width: 150, height: 150 }} />} */}
@@ -236,13 +222,12 @@ function ClothesSheetScreen({route, navigation}) {
         onChangeText={(value)=>{setMemo(value)}}
         value={memo}
       /> 
-        <View style={{flexDirection:"row", alignSelf:"flex-start"}}>
-        {item === -1?( 
+        <View style={{flexDirection:"row", alignSelf:"flex-end"}}>
+        {item == -1?( 
           <Button title="저장하기" color="black" onPress={()=>saveData()} />
         ):(
           <Button title="저장하기" color="black" onPress={()=>updateAlert()} />
         )} 
-          <Button title="코디 목록" color="black" onPress={() => navigation.goBack()} />
         </View>
       </View>
     </View>

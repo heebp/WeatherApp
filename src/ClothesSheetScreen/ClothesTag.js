@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useLayoutEffect } from 'react';
 import Dialog from "react-native-dialog";
-
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { DBContext } from '../Context/DataBase';
 
 function ClothesTag(props){
@@ -32,6 +32,7 @@ function ClothesTag(props){
     const [isChecked3, setChecked3] = useState(notChecked);
     const [visible, setVisible] = useState(false);
     const [forceRender2, setForceRender2] =useState(false);
+
     const showDialog = () => {
         setVisible(true);
       };
@@ -50,14 +51,14 @@ function ClothesTag(props){
           setForceRender(false);
         }
       }
-      const handleAdd = (item) => {
+      const handleAdd = (dbitem) => {
         //setForceRender2(false)
         var tag
-        if(item!=undefined){
+        if(dbitem!=undefined){
            tag = {
             id: nextId.current,
-            tagName:item.tagName,
-            categoryName:item.categoryName,
+            tagName:dbitem.tagName,
+            categoryName:dbitem.categoryName,
             click:tagClick,
             backgroundColor:'darkgray'
           }
@@ -73,8 +74,6 @@ function ClothesTag(props){
         }
         
         setVisible(false);
-
-
         setClothesTag(clothesTag=>[...clothesTag, tag])
         setClothesTagInput('');
         nextId.current += 1;
@@ -111,32 +110,27 @@ function ClothesTag(props){
         <Text>{item.tagName}</Text>
       </TouchableOpacity>
       ):((isChecked2==checked && item.categoryName==="하의")?(
-        <TouchableOpacity style={{ alignItems:"center", marginTop:10, marginLeft:10, width:60,borderRadius:100, margin:10, backgroundColor: item.backgroundColor}} key={item.id} onPress={()=>{handleTagClick(item)}}>
+      <TouchableOpacity style={{ alignItems:"center", marginTop:10, marginLeft:10, width:60,borderRadius:100, margin:10, backgroundColor: item.backgroundColor}} key={item.id} onPress={()=>{handleTagClick(item)}}>
         <Text>{item.tagName}</Text>
       </TouchableOpacity>
       ):((isChecked3==checked && item.categoryName==="겉옷")?(
         <TouchableOpacity style={{ alignItems:"center", marginTop:10, marginLeft:10, width:60,borderRadius:100, margin:10, backgroundColor: item.backgroundColor}} key={item.id} onPress={()=>{handleTagClick(item)}}>
-        <Text>{item.tagName}</Text>
-      </TouchableOpacity>
+          <Text>{item.tagName}</Text>
+        </TouchableOpacity>
       ):(
-        <View></View>
+        <></>
       )))
       );
       const loadTag=()=>{
         // 렌더링 해제
         setForceRender2(true)
-        console.log("로드 태그")
         db.transaction((tx) => {
           tx.executeSql(`SELECT * FROM clothes_tag 
           join sheet_tag on clothes_tag.tagNum = sheet_tag.tagNum WHERE date='`+props.value.date+`'`,
           [],
             (tx, results) => {
-              console.log("셀렉트 옷 태그 log:");
-              console.log(results)
               const rows = results.rows;
-              console.log("셀렉트 옷 태그 log:"+rows.length);
                 for (let i=0; i<rows.length; i++) {
-                  console.log(rows.item(i));
                   handleAdd(rows.item(i))
                 }
 
@@ -148,7 +142,6 @@ function ClothesTag(props){
       }
     //상위 컴포넌트에 값 전달
     const confirmTag=(clothesTag)=>{
-        //console.log("하위"+clothesTag)
         props.propfunction(clothesTag)
     }
     useEffect(()=>{
@@ -162,36 +155,36 @@ function ClothesTag(props){
     },[clothesTag])
     return(
         <View>
-            <View style={{flexDirection:"row", alignSelf:"flex-start", margin:10}}>
+          <View style={styles.categories}>
 
-          <TouchableOpacity style={{width:45, height:30, borderWidth:1, alignItems:'center',justifyContent:"center", backgroundColor:isChecked,}} onPress={()=>handleTagCategory("상의")}>
-            <Text>상의</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={{width:45, height:30, borderWidth:1, alignItems:'center',justifyContent:"center", backgroundColor:isChecked,}} onPress={()=>handleTagCategory("상의")}>
+              <Text>상의</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={{width:45, height:30, borderWidth:1, alignItems:'center',justifyContent:"center",  backgroundColor:isChecked2,}} onPress={()=>handleTagCategory("하의")}>
-            <Text>하의</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={{width:45, height:30, borderWidth:1, alignItems:'center',justifyContent:"center",  backgroundColor:isChecked2,}} onPress={()=>handleTagCategory("하의")}>
+             <Text>하의</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={{width:45, height:30,  borderWidth:1, alignItems:'center',justifyContent:"center", backgroundColor:isChecked3,}} onPress={()=>handleTagCategory("겉옷")}>
-            <Text>겉옷</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={{width:45, height:30,  borderWidth:1, alignItems:'center',justifyContent:"center", backgroundColor:isChecked3,}} onPress={()=>handleTagCategory("겉옷")}>
+              <Text>겉옷</Text>
+            </TouchableOpacity>
 
           </View>
-          <View style={{flexDirection:"row", alignSelf:"flex-start",margin:3}}>
-        <TouchableOpacity style={{alignSelf:"flex-start"}} onPress={showDialog}>
-          <Image source={ require('../images/plusImage.png') } style={ { width: 30, height: 30, } } />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleDeleteTag} >
-          <Image source={ require('../images/binImage.png') } style={ { width: 30, height: 30, } } />
-        </TouchableOpacity>
+          <View style={styles.iconlist}>
+            <TouchableOpacity onPress={showDialog}>
+              <FontAwesome name="plus" size={30} style={styles.icon}/>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleDeleteTag} >
+              <FontAwesome name="trash" size={30} style={styles.icon}/>
+            </TouchableOpacity>
           </View>
  
-        <Dialog.Container visible={visible}>
-          <Dialog.Title>태그 추가</Dialog.Title>
-          <Dialog.Input value={clothesTagInput} onChangeText={(value)=>{setClothesTagInput(value)}}></Dialog.Input>
-          <Dialog.Button label="추가" onPress={()=>handleAdd()} />
-          <Dialog.Button label="취소"  onPress={handleCancel}/>
-        </Dialog.Container> 
+          <Dialog.Container visible={visible}>
+            <Dialog.Title>태그 추가</Dialog.Title>
+            <Dialog.Input value={clothesTagInput} onChangeText={(value)=>{setClothesTagInput(value)}}></Dialog.Input>
+            <Dialog.Button label="추가" onPress={()=>handleAdd()} />
+            <Dialog.Button label="취소"  onPress={handleCancel}/>
+          </Dialog.Container> 
 
           <FlatList
             key={'#'}
@@ -209,5 +202,21 @@ const styles = StyleSheet.create({
       alignItems: 'center', 
       justifyContent: 'center' 
     },
+    categories:{
+      flexDirection:"row",
+      alignSelf:"flex-start", 
+      margin:10,
+      height:15
+    },
+    iconlist:{
+      flexDirection:"row",
+      alignSelf:"flex-start",
+      margin:15,
+      height:15
+    },
+    icon:{
+      width: 40,
+      height: 30,
+    }
 })
 export default ClothesTag
