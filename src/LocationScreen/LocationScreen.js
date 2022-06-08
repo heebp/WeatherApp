@@ -14,12 +14,12 @@ import Geocode from 'react-geocode'
 import { useLayoutEffect } from 'react';
 import { LocationContext } from '../Context/CurrentLocation';
 import {API_KEY, GOOGLE_CUSTOM_API_KEY, SEARCH_ENGINE} from '@env'
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { DBContext } from '../Context/DataBase';
 Geocode.setApiKey(GOOGLE_CUSTOM_API_KEY)
 Geocode.setLanguage('ko')
 Geocode.setRegion('es')
 Geocode.enableDebug()
-const Stack = createNativeStackNavigator();
 
 
 function LocationScreen({navigation}) {
@@ -41,7 +41,7 @@ function LocationScreen({navigation}) {
       console.log(response.results[0].geometry.location);
       console.log(response);
       console.log("test"+latt.lat +"lon"+ latt.lng);
-      //setSearchLocation(latt);
+      setSearchLocation(latt);
       setMarkerLocation(latt);
        mapRef.current.animateToRegion({
          latitude : latt.lat,
@@ -55,23 +55,13 @@ function LocationScreen({navigation}) {
     }
   );
   }
-  console.log(location)
   function createMarker(coordinate){
     const marker={"lat":coordinate.latitude,"lng":coordinate.longitude}
     setMarkerLocation(marker)
   }
-    useLayoutEffect(()=>{
-        navigation.setOptions({
-          headerLeft: () => (
-            <TouchableOpacity
-            title="Category"
-            onPress={ () => navigation.navigate('Category')}>
-              <Image source={ require('../images/categoryButton.png') } style={ { width: 30, height: 30, } } />
-            </TouchableOpacity>
-          )
-        })
-      })
+  useEffect(()=>{
 
+  },[markerLocation])
       return(
         <View style={{width: "100%", height: "100%"}}>
           <View style={{flexDirection:'row', margin: 5,  borderWidth:2, borderColor:'#888', borderRadius:10, backgroundColor:'#fff'}}>
@@ -94,7 +84,7 @@ function LocationScreen({navigation}) {
             </View>
             <View style={{flex:1, }}>
               <TouchableOpacity style={{alignItems:'flex-end'}} onPress={() => getGeocoding(searchWord)}>
-                <Image source={ require('../images/searchImage.png') } style={ { width: 45, height: 45, } } />
+                <FontAwesome5 name="search" size={35} style={{margin:5}}/>
               </TouchableOpacity>
             </View>
           </View>
@@ -132,7 +122,7 @@ function LocationScreen({navigation}) {
             />
           </MapView>
           <View style={{position:'absolute',  top: '86%',  alignSelf: 'center',justifyContent:'center' }}>
-              <TouchableOpacity style={{justifyContent:'center', backgroundColor:'black',borderRadius:100,width:300,height:40}}onPress={() => console.log("test")}>
+              <TouchableOpacity style={{justifyContent:'center', backgroundColor:'black',borderRadius:100,width:300,height:40}}onPress={()=> navigation.navigate('LocationList',{markerLocation})}>
                 <Text style={{fontWeight:"800",fontSize:15,color:'white',alignSelf: 'center'}}>위치 저장</Text>
               </TouchableOpacity>
             </View>

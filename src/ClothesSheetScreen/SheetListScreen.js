@@ -15,50 +15,39 @@ import {
 } from 'react-native';
 import DropDownPicker from "react-native-dropdown-picker";
 import { DBContext } from '../Context/DataBase';
+import WeatherIcon from '../WeatherIcon';
 
 function SheetList({navigation}) {
+  
   const db = useContext(DBContext)
   const isFocused = useIsFocused();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
-  const [selectedEmail, setSelectedEmail] = useState('');
+  const [open2, setOpen2] = useState(false);
+  const [value2, setValue2] = useState(null);
+  const [selected, setSelected] = useState('');
+  const [selected2, setSelected2] = useState('');
   const [sheet, setSheet] = useState([]);
-  const [catags, setCatags] = useState([])
-  
-  useLayoutEffect(()=>{
-    navigation.setOptions({
-      headerLeft: () => (
-        <TouchableOpacity
-        title="Category"
-        onPress={ () => navigation.navigate('Category')}>
-          <Image source={ require('../images/categoryButton.png') } style={ { width: 30, height: 30, } } />
-        </TouchableOpacity>
-      ),
-    })
-  })
+
 
   const loadSheet=()=>{
     db.transaction((tx) => {
       tx.executeSql(`SELECT clothes_sheet.date, weather,group_concat(categoryName) categories,group_concat(tagName) tags,temperature,windchill,memo FROM clothes_sheet 
       LEFT JOIN sheet_tag on clothes_sheet.date = sheet_tag.date 
       LEFT JOIN clothes_tag on clothes_tag.tagNum = sheet_tag.tagNum 
-      GROUP BY clothes_sheet.date
+      GROUP BY clothes_sheet.date Order by clothes_sheet.date desc
       `,
       [],
         (tx, results) => {
-          console.log("조회 log:"+results);
           const rows = results.rows;
-          console.log("조회 log:"+rows.length);
           let temp = [];
             for (let i=0; i<rows.length; i++) {
-              console.log(rows.item(i));
               temp.push({
                 ...rows.item(i),
                 i
               });
             }
         setSheet(temp)
-        //console.log(sheet)
         },
       (error)=>{
         console.log('에러발생',error);
@@ -66,25 +55,39 @@ function SheetList({navigation}) {
     });
   }
   useEffect(()=>{
+    console.log(open2)
+    if(open==true){
+      if(open2==true){
+        setOpen(false)
+      }
+      setOpen2(false)
+    } else if(open2 ==true){
+      setOpen(false)
+    }else if(open==true && open2 ==true){
+      setOpen2(false)
+    }
     loadSheet();
-},[isFocused])
+    
+},[isFocused,open,open2])
 
 
 const renderItem = ({ item, index }) => (
   <TouchableOpacity key={item.i} style={{marginTop:40, marginLeft:35, width:150, height:180, backgroundColor: 'lightgray'}} onPress={()=> navigation.navigate('ClothesSheet',{item:item})}>
   {/* <Text>{item.i}</Text> */}
     <Text>날짜 : {item.date}</Text>
-    <Text >날씨 : {item.weather}</Text>
-    <Text >기온 : {item.temperature}</Text>
-    <Text >체감온도 : {item.windchill}</Text>
-    <Text> 태그 : {item.tags}</Text>
+    <Text>날씨 :
+      <WeatherIcon value={item.weather} />
+    </Text>
+    <Text>기온 : {item.temperature} 도</Text>
+    <Text>체감온도 : {item.windchill} 도</Text>
+    <Text>의상 태그 : &lt;{item.tags}&gt;</Text>
 {/* 
     ------------db값 spilit()함수 적용안됨------------ 
     <Text>상의 : {item.tags}</Text>
     <Text >하의 : </Text>
     <Text >겉옷 : </Text>
 */}
-    <Text >오늘의 메모 : {item.memo}</Text>
+    <Text>메모 :  {item.memo} </Text>
     <StatusBar  style="black"/>
   </TouchableOpacity> 
 );
@@ -92,62 +95,82 @@ const renderItem = ({ item, index }) => (
       return (
 
         <View style={{flex:1}}>
-          <View style={{flex:1}}>
             <View style={{flexDirection: 'row'}}>  
-             <View  style={{marginTop:20, marginLeft:20}}>
+             <View  style={{ marginLeft:20}}>
               <DropDownPicker
-              open={open}
-              value={value}
-              setOpen={setOpen}
-              setValue={setValue}
-              placeholder="날씨순"
-              items={[
-                { label: "맑음", value: "sun" },
-                { label: "흐림", value: "cloudy" },
-                { label: "비", value: "rain" },
-                { label: "눈", value: "snow" }
-              ]}
-              defaultIndex={0}
-              containerStyle={{height:30}}
-              onChangeItem={(item) => setSelectedEmail(item.value)}
-              itemStyle={{
-                justifyContent: 'flex-start',
-              }}
-              dropDownMaxHeight={200}
-   
-              style={{
-                borderTopLeftRadius: 5,
-                borderTopRightRadius: 5,
-                borderBottomLeftRadius: 5,
-                borderBottomRightRadius: 5,
-                width: 90,
-              }}
-              dropDownStyle={{
-                borderBottomLeftRadius: 20,
-                borderBottomRightRadius: 20,
-                backgroundColor: 'green',
-              }}
-              /> 
-              </View>
-  
-              <View style={styles.container}>
+                  style={styles.dropDown}
+                  placeholder="날씨순"
+                  items={[
+                    { label: <WeatherIcon value={"Clear"}/> , value: "Clear" },
+                    { label: <WeatherIcon value={"Clouds"}/>, value: "cloudy" },
+                    { label: <WeatherIcon value={"Rain"}/>, value: "rain" },
+                    { label: <WeatherIcon value={"Snow"}/>, value: "snow" }
+                  ]}
+                  defaultIndex={0}
+                  containerStyle={{height:30}}
+                  onChangeItem={(item) => setSelected(item.value)}
+                  itemStyle={{
+                    justifyContent: 'flex-start',
+                  }}
+                  dropDownMaxHeight={10}
+                  
+                  open={open}
+                  value={value}
+                  setOpen={setOpen}
+                  setValue={setValue}
+                  
+                  dropDownStyle={{
+                    borderBottomLeftRadius: 20,
+                    borderBottomRightRadius: 20,
+                    backgroundColor: 'green',
+                  }}
+                /> 
+              <DropDownPicker
+                style={styles.dropDown2}
+                placeholder="온도순"
+                  items={[
+                    { label: "높은순", value: "higher" },
+                    { label: "낮은순", value: "lower" },
+                    { label: "비슷한순", value: "similar" },
+                  ]}
+             
+                  onChangeItem={(item) => setSelected2(item.value)}
+                  itemStyle={{
+                    justifyContent: 'flex-start',
+                  }}
+                  dropDownMaxHeight={10}
+        
+                  open={open2}
+                  value={value2}
+                  setOpen={setOpen2}
+                  setValue={setValue2}
+        
+                  dropDownStyle2={{
+                    borderBottomLeftRadius: 20,
+                    borderBottomRightRadius: 20,
+                    backgroundColor: 'green',
+                  }}
+              />
+
+             </View>
+              
+             <View style={styles.button}>
                 <Button
                 title="추가하기"
                 color="black"
                 onPress={() => navigation.navigate('ClothesSheet',{item: -1})}
                 />
-              </View>
+             </View>
             </View> 
-              <FlatList
+            <FlatList
                 key={'#'}
                 data={sheet}
                 renderItem={renderItem}
                 // keyExtractor={(sheet) => sheet.id}
                 numColumns={2}
-              />
-          </View>
-        </View>  
+            />
 
+        </View>  
       );
     }
     const styles = StyleSheet.create({
@@ -156,5 +179,39 @@ const renderItem = ({ item, index }) => (
           alignItems: 'center', 
           justifyContent: 'center' 
         },
+        dropDown : {
+
+    
+          marginTop:30,
+          marginLeft:20,
+          borderTopLeftRadius: 5,
+          borderTopRightRadius: 5,
+          borderBottomLeftRadius: 5,
+          borderBottomRightRadius: 5,
+          width: 90,
+          zIndex: 10
+        },
+        dropDown2 : {
+
+       
+
+          marginLeft:130,
+          borderTopLeftRadius: 5,
+          borderTopRightRadius: 5,
+          borderBottomLeftRadius: 5,
+          borderBottomRightRadius: 5,
+          width: 90,
+          zIndex: 10
+        },
+        button : {
+          // marginTop:0,
+          // marginLeft:260,
+          // backgroundColor:'white',
+          borderColor: 'gray',
+          borderWidth: 2,
+          borderRadius: 5,
+          width:90
+        }
     })
+    
     export default SheetList
