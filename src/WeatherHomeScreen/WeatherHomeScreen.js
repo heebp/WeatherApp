@@ -17,8 +17,9 @@ import { WeatherContext } from '../Context/CurrentWeather';
 import GetTag from './GetTag';
 import GetImages from './GetImage';
 import GetTime from './GetTime';
-Moment.startPooledTimer(1000);
-const Stack = createNativeStackNavigator();
+
+//Moment.startPooledTimer(1000);
+const WeatherHomeStack = createNativeStackNavigator();
 function WeatherHomeScreen({navigation}) {
   console.log("WeatherHOmeScreen 실행")
   const weather = useContext(WeatherContext);
@@ -43,25 +44,15 @@ const nextButtonHandler = () => {
     //ssw(searchWord);
   }, []);
   
-  useLayoutEffect(()=>{
-    navigation.setOptions({
-      headerLeft: () => (
-        <TouchableOpacity
-        title="Category"
-        onPress={ () => navigation.navigate('Category')}>
-          <Image source={ require('../images/categoryButton.png') } style={ { width: 30, height: 30, } } />
-        </TouchableOpacity>
-      ),
-    })
-  })
   // 하위 컴포넌트 값 받아오기
   const highfunction= (text) =>{
     console.log(text);
     setSearchWord(text)
   }
+
  return (
     <View style={styles.screen}>
-          <>
+        <>
           <View style={styles.top}>
             <GetTime/>
           {/* <Moment interval={1000} format="YYYY-MM-DD HH:mm" style={styles.middletext} element={Text} >{nowTime1}</Moment> */}
@@ -95,8 +86,9 @@ const nextButtonHandler = () => {
                 <GetTag value={weather.temp} propfunction={highfunction}/>
             </View>
           </View>
-          </>
+        </>
     </View>
+
     );
   }
   
