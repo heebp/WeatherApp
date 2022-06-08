@@ -13,20 +13,15 @@ function GetTag(props){
     */
 
     //props 사용 불가능
-    //-> Conte APi 사용
+    //-> Context APi 사용
     const getData = (temp) => {
-        //console.log(temp)
         var temperature = Math.round(temp)
-        //console.log(temperatue)
         try{
           db.transaction((tx) => {
             tx.executeSql(`SELECT * FROM clothes_tag WHERE highTemp>=`+ temperature+` AND `+ temperature +`>=lowTemp;`,[],  (tx, results) => {
-              console.log("aaaaaa");
-              console.log(results)
                 const rows = results.rows;
                 let tag = [];
                 for (let i=0; i<rows.length; i++) {
-                    console.log(rows.item(i));
                     tag.push({
                         ...rows.item(i),
                     });
@@ -49,7 +44,6 @@ function GetTag(props){
 
     useEffect(() => {
         setTemperature(props.value)
-        //console.log("GetTag:"+props.value)
         getData(temperature);
     }, [props]);
 
