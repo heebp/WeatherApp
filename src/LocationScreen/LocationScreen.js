@@ -121,9 +121,12 @@ function LocationScreen({navigation}) {
               }}
             />
           </MapView>
-          <View style={{position:'absolute',  top: '86%',  alignSelf: 'center',justifyContent:'center' }}>
-              <TouchableOpacity style={{justifyContent:'center', backgroundColor:'black',borderRadius:100,width:300,height:40}}onPress={()=> navigation.navigate('LocationList',{markerLocation})}>
+          <View style={{position:'absolute',  top: '86%',  alignSelf: 'center',justifyContent:'center', flexDirection:'row' }}>
+              <TouchableOpacity style={{justifyContent:'center', backgroundColor:'black',borderRadius:100,width:200,height:40}}onPress={()=> navigation.navigate('LocationList',{markerLocation})}>
                 <Text style={{fontWeight:"800",fontSize:15,color:'white',alignSelf: 'center'}}>위치 저장</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={{justifyContent:'center', backgroundColor:'black',borderRadius:100,width:100,height:40,marginLeft:10}}onPress={()=> navigation.navigate('LocationList',{})}>
+                <Text style={{fontWeight:"800",fontSize:15,color:'white',alignSelf: 'center'}}>위치 목록</Text>
               </TouchableOpacity>
             </View>
         </View>
