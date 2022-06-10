@@ -1,7 +1,7 @@
 import React, {useEffect, createContext, useState } from "react";
-import Geolocation from 'react-native-geolocation-service';
+import Geolocation, { PositionError } from 'react-native-geolocation-service';
 import {  Platform, PermissionsAndroid,} from "react-native"
-
+import {API_KEY, GOOGLE_CUSTOM_API_KEY, SEARCH_ENGINE} from '@env'
 export const LocationContext = createContext();
 
 async function requestPermission() { 
@@ -23,6 +23,19 @@ export const CurrentLocation = (props)=>{
     console.log("CurrentLocation 실행");
     const [lat, setlatitude] = useState();
     const [lng, setlongitude] = useState();
+    const [currentLat, setCurrentLat] = useState()
+    const [currentLng, setCurrentLng] = useState()
+    const [currentAddress, setCurrentAddress] = useState('')
+
+    const getAddress = async (lat, lng) => {
+      const response = await fetch(
+        'https://maps.googleapis.com/maps/api/geocode/json?address=' + lat + ',' + lng
+        + '&key=' + GOOGLE_CUSTOM_API_KEY + '&language=ko');
+      const json = await response.json();
+      console.log(json.results[0].formatted_address)
+      setCurrentAddress(json.results[0].formatted_address)
+    };
+
     useEffect(() => {
         requestPermission().then(result => { 
           console.log({ result });
@@ -31,8 +44,10 @@ export const CurrentLocation = (props)=>{
              pos => { 
                setlatitude(pos.coords.latitude);
                setlongitude(pos.coords.longitude);
-               console.log(pos.coords.latitude);
-               console.log(pos.coords.longitude)
+               setCurrentLat(pos.coords.latitude)
+               setCurrentLng(pos.coords.longitude)
+               getAddress(pos.coords.latitude,pos.coords.longitude)
+
              }, 
              error => { 
                console.log(error); 
@@ -48,7 +63,7 @@ export const CurrentLocation = (props)=>{
       }, []);
       
     return(
-        <LocationContext.Provider value={{lat,lng,setlatitude,setlongitude}}>
+        <LocationContext.Provider value={{lat,lng,currentLat,currentLng,currentAddress,setlatitude,setlongitude}}>
             {props.children}
         </LocationContext.Provider>
     )
