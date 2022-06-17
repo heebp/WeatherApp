@@ -1,5 +1,4 @@
 import React, {useContext, useEffect, useState,useRef} from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
   StyleSheet,
   Button,
@@ -11,7 +10,6 @@ import {
 } from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 import Geocode from 'react-geocode'
-import { useLayoutEffect } from 'react';
 import { LocationContext } from '../Context/CurrentLocation';
 import {API_KEY, GOOGLE_CUSTOM_API_KEY, SEARCH_ENGINE} from '@env'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
@@ -36,11 +34,7 @@ function LocationScreen({navigation}) {
     Geocode.fromAddress(searchWord).then(
       response => {
       const latt = response.results[0].geometry.location;
-      console.log(response.results[0].address_components);
-      console.log(response.results[0].geometry.location);
-      console.log(response.results[0].geometry.location);
       console.log(response);
-      console.log("test"+latt.lat +"lon"+ latt.lng);
       setSearchLocation(latt);
       setMarkerLocation(latt);
        mapRef.current.animateToRegion({
