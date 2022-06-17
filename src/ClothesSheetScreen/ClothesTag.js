@@ -18,8 +18,6 @@ import { DBContext } from '../Context/DataBase';
 function ClothesTag(props){
     let checked = 'yellow'
     let notChecked = 'lightgrey'
-    const firstRender= useRef(true);
-    //console.log(props.value.date)
     const [categoryName,setCategoryName] = useState('상의')
     const nextId = useRef(100);
     const db = useContext(DBContext)
