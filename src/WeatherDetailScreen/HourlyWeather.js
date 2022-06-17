@@ -8,12 +8,9 @@ import {
 import { useEffect } from 'react';
 import {API_KEY} from '@env'
 import { LocationContext } from '../Context/CurrentLocation';
-import { NavigationContainer, useNavigation,useIsFocused } from '@react-navigation/native';
+import {useIsFocused } from '@react-navigation/native';
 import 'moment/locale/ko'
-import WeatherIcon from './DetailScreenWeatherIcon';
-
-//moment.locale('ko')
-
+import WeatherIcon from '../assets/WeatherIcon';
 
 function HourlyWeather() {
 const isFocused = useIsFocused()
@@ -25,15 +22,13 @@ const getForecastWeather = async (lat, lon) => {
     `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=alerts,current,minutely,daily&appid=${API_KEY}&units=metric`
   );
   const json = await response.json();
-  //console.log("json확인",json.hourly)
   setHours(json.hourly);
 };
 
-  useEffect(() => {
+useEffect(() => {
+  getForecastWeather(location.lat, location.lng);
+}, [isFocused]);
 
-    getForecastWeather(location.lat, location.lng);
-    
-  }, [isFocused]);
       return (
         <View style={styles.screen}>
           {hours.length === 0 ? (
@@ -49,7 +44,7 @@ const getForecastWeather = async (lat, lon) => {
           hours.slice(0,12).map((hour, index) => (
             <View key={index} style={styles.hour}>
               <Text style={styles.tinytext}>{new Date(hour.dt * 1000).toString().substring(16, 18)}시</Text> 
-                <WeatherIcon value={hour.weather[0].main}/>
+                <WeatherIcon size={30} value={hour.weather[0].main} color="white"/>
 {/*                 
               <Text style={styles.tinytext}>
                 {hour.weather[0].main}
