@@ -15,8 +15,8 @@ import {
 } from 'react-native';
 import DropDownPicker from "react-native-dropdown-picker";
 import { DBContext } from '../Context/DataBase';
-import WeatherIcon from '../WeatherIcon';
-
+import WeatherIcon from '../assets/WeatherIcon';
+import { WeatherContext } from '../Context/CurrentWeather';
 function SheetList({navigation}) {
   
   const db = useContext(DBContext)
@@ -25,10 +25,9 @@ function SheetList({navigation}) {
   const [value, setValue] = useState(null);
   const [open2, setOpen2] = useState(false);
   const [value2, setValue2] = useState(null);
-  const [selected, setSelected] = useState('');
-  const [selected2, setSelected2] = useState('');
   const [sheet, setSheet] = useState([]);
-
+  const [tempSheet, setTempSheet] = useState([])
+  const weather = useContext(WeatherContext);
 
   const loadSheet=()=>{
     db.transaction((tx) => {
@@ -47,36 +46,70 @@ function SheetList({navigation}) {
                 i
               });
             }
-        setSheet(temp)
+            if(JSON.stringify(temp)!=JSON.stringify(sheet))
+              setSheet(temp)
+            setTempSheet(temp)
         },
       (error)=>{
         console.log('에러발생',error);
       });
     });
   }
-  useEffect(()=>{
-    console.log(open2)
-    if(open==true){
-      if(open2==true){
-        setOpen(false)
-      }
-      setOpen2(false)
-    } else if(open2 ==true){
-      setOpen(false)
-    }else if(open==true && open2 ==true){
-      setOpen2(false)
+
+  const sortByWeather = (weather) =>{
+    setSheet(tempSheet.filter((sheet)=>sheet.weather == weather))
+  }
+
+  const sortByTemp = (value) =>{
+    if(value=="higher"){
+      setSheet(tempSheet.sort(function (a,b){
+        if(a.temperature > b.temperature){
+          return -1
+        }
+        if(a.temperature < b.temperature){
+          return 1
+        }
+        return 0
+      }))
     }
+    if(value=="lower"){
+      setSheet(tempSheet.sort(function (a,b){
+        if(a.temperature > b.temperature){
+          return 1
+        }
+        if(a.temperature < b.temperature){
+          return -1
+        }
+        return 0
+      }))
+    }
+    if(value=="similar"){
+      const temp = Math.round(weather.temp)
+      setSheet(tempSheet.sort(function (a,b){
+        if(a.temperature >temp && b.temperature< temp){
+          return 1
+        }
+        if(a.temperature <temp && b.temperature> temp){
+          return -1
+        }
+        return (Math.abs(temp-a.temperature) - Math.abs(temp-b.temperature))
+      }))
+    }
+  }
+
+  useEffect(()=>{ 
     loadSheet();
-    
-},[isFocused,open,open2])
+
+},[isFocused])
 
 
 const renderItem = ({ item, index }) => (
-  <TouchableOpacity key={item.i} style={{marginTop:40, marginLeft:35, width:150, height:180, backgroundColor: 'lightgray'}} onPress={()=> navigation.navigate('ClothesSheet',{item:item})}>
+  <TouchableOpacity key={item.i} style={styles.sheet} onPress={()=> navigation.navigate('ClothesSheet',{item:item})}>
+    <View style={styles.sheetcontainer}>
   {/* <Text>{item.i}</Text> */}
-    <Text>날짜 : {item.date}</Text>
+    <Text style={styles.sheetdate}>날짜 : {item.date}</Text>
     <Text>날씨 :
-      <WeatherIcon value={item.weather} />
+      <WeatherIcon value={item.weather} size={20} />
     </Text>
     <Text>기온 : {item.temperature} 도</Text>
     <Text>체감온도 : {item.windchill} 도</Text>
@@ -89,6 +122,7 @@ const renderItem = ({ item, index }) => (
 */}
     <Text>메모 :  {item.memo} </Text>
     <StatusBar  style="black"/>
+    </View>
   </TouchableOpacity> 
 );
 
@@ -101,14 +135,15 @@ const renderItem = ({ item, index }) => (
                   style={styles.dropDown}
                   placeholder="날씨순"
                   items={[
-                    { label: <WeatherIcon value={"Clear"}/> , value: "Clear" },
-                    { label: <WeatherIcon value={"Clouds"}/>, value: "cloudy" },
-                    { label: <WeatherIcon value={"Rain"}/>, value: "rain" },
-                    { label: <WeatherIcon value={"Snow"}/>, value: "snow" }
+                    { label: <WeatherIcon value={"Clear"} size={25} /> , value: "Clear" },
+                    { label: <WeatherIcon value={"Clouds"} size={25}/>, value: "Clouds" },
+                    { label: <WeatherIcon value={"Rain"} size={25}/>, value: "Rain" },
+                    { label: <WeatherIcon value={"Snow"} size={25}/>, value: "Snow" }
                   ]}
                   defaultIndex={0}
-                  containerStyle={{height:30}}
-                  onChangeItem={(item) => setSelected(item.value)}
+                  containerStyle={{width: 100, height:0 ,marginLeft:20}}
+                  onChangeItem={(value) => setSelected(value)}
+                  onSelectItem={(item)=>sortByWeather(item.value)}
                   itemStyle={{
                     justifyContent: 'flex-start',
                   }}
@@ -133,8 +168,10 @@ const renderItem = ({ item, index }) => (
                     { label: "낮은순", value: "lower" },
                     { label: "비슷한순", value: "similar" },
                   ]}
-             
+                  defaultIndex={0}
+                  containerStyle={{width: 100, marginLeft:140}}
                   onChangeItem={(item) => setSelected2(item.value)}
+                  onSelectItem={(item)=>sortByTemp(item.value)}
                   itemStyle={{
                     justifyContent: 'flex-start',
                   }}
@@ -155,11 +192,12 @@ const renderItem = ({ item, index }) => (
              </View>
               
              <View style={styles.button}>
-                <Button
-                title="추가하기"
-                color="black"
+                <TouchableOpacity
+                color="white"
                 onPress={() => navigation.navigate('ClothesSheet',{item: -1})}
-                />
+                >
+                  <Text style={styles.buttontext}>추가하기</Text>
+                </TouchableOpacity>
              </View>
             </View> 
             <FlatList
@@ -177,40 +215,56 @@ const renderItem = ({ item, index }) => (
         screen:{
           flex: 1,
           alignItems: 'center', 
-          justifyContent: 'center' 
+          justifyContent: 'center', 
         },
         dropDown : {
 
-    
-          marginTop:30,
-          marginLeft:20,
           borderTopLeftRadius: 5,
           borderTopRightRadius: 5,
           borderBottomLeftRadius: 5,
           borderBottomRightRadius: 5,
-          width: 90,
+          width: 100,
           zIndex: 10
         },
         dropDown2 : {
 
-       
-
-          marginLeft:130,
           borderTopLeftRadius: 5,
           borderTopRightRadius: 5,
           borderBottomLeftRadius: 5,
           borderBottomRightRadius: 5,
-          width: 90,
+          width: 100,
           zIndex: 10
         },
         button : {
-          // marginTop:0,
-          // marginLeft:260,
-          // backgroundColor:'white',
+          marginLeft:30,
+          alignItems:'center',
+          justifyContent:'center',
+          backgroundColor:'white',
           borderColor: 'gray',
           borderWidth: 2,
           borderRadius: 5,
           width:90
+        },
+        buttontext:{
+          fontWeight:"bold"
+        },
+        sheet:{
+          marginTop:40, 
+          marginLeft:35, 
+          width:150, 
+          height:180, 
+          backgroundColor: 'lightgray',
+          borderRadius:20,
+          elevation: 8,
+        },
+        sheetcontainer:{
+          marginTop:8,
+          marginLeft:8,
+          
+        },
+        sheetdate:{
+          fontWeight:'bold', 
+          margin:5
         }
     })
     
