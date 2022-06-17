@@ -1,33 +1,25 @@
 import React, {Component,useRef, useState} from 'react';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
 import {
   StyleSheet,
   Text,
   View,
-  ActivityIndicator,
-  Button,
-  Alert,
-  TouchableOpacity,
-  Image,
   ScrollView,
   Dimensions,
+  ImageBackground
 } from 'react-native';
-import { useLayoutEffect,useEffect } from 'react';
+import { useEffect } from 'react';
 import HourlyWeather from './HourlyWeather';
 import DailyWeather from './DailyWeather';
-const fullWidth = Dimensions.get('window').width
-const fullHeight = Dimensions.get('window').height
 
 function WeatherDetailScreen({navigation}) {
     const scrollviewRef = useRef()
-
-    console.log("웨더 디테일 렌더 로드")
     useEffect(()=>{
 
     },[navigation])
       return (
         <View style={styles.screen}>
+          <ImageBackground source={require("../assets/images/bg.jpg")} resizeMode="cover">
           <View style={styles.band}>
 
           </View>
@@ -45,6 +37,7 @@ function WeatherDetailScreen({navigation}) {
           <View style={styles.bottom}>
             <DailyWeather style={styles.screen}/>
           </View>
+          </ImageBackground>
         </View>
       );
     }
@@ -59,36 +52,42 @@ function WeatherDetailScreen({navigation}) {
           width: Dimensions.get('window').width,
           alignItems: 'flex-start', 
           justifyContent: 'center' ,
-          backgroundColor:"darkslateblue"
+          //backgroundColor:"darkslateblue"
         },
         band2:{
-          flex:0.05,
+          flex:0.07,
           width: Dimensions.get('window').width,
           alignItems: 'flex-start', 
           justifyContent: 'center' ,
-          backgroundColor:"black"
+          backgroundColor:"black",
+          borderWidth: 5,
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
         },
         bandtext:{
           color:"white",
           fontSize:18,
         },
-        tinyText: {
-          fontSize: 1,
-        },
-        hourly: {
-          flex: 0.2,
-          backgroundColor: "darkslateblue",
 
+        hourly: {
+          flex: 0.3,
+          backgroundColor: "darkslateblue",
+          marginBottom:40,
           justifyContent:"center",
           alignItems: 'center',
           alignContent:"center",
-          
+          borderWidth: 5,
+          borderBottomLeftRadius: 20,
+          borderBottomRightRadius: 20,
         },
         bottom: {
-          flex: 0.5,
+          flex: 0.4,
+          marginBottom:40,
           width: Dimensions.get('window').width,
-          backgroundColor: "pink",
-
+          backgroundColor: "gray",
+          borderWidth: 5,
+          borderBottomLeftRadius: 20,
+          borderBottomRightRadius: 20,
         },
     })
     export default WeatherDetailScreen

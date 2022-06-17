@@ -1,16 +1,11 @@
 import React, { useState, useEffect,useContext } from 'react';
-import { TouchableOpacity, StyleSheet, Text } from 'react-native';
+import { TouchableOpacity, StyleSheet, Text,View } from 'react-native';
 import { DBContext } from '../Context/DataBase';
 
 function GetTag(props){
     const db = useContext(DBContext)
-
-    console.log("GetTag 실행")
     const [tag, setTag] = useState([]);
     const [temperature, setTemperature] = useState(10);
-    /*
-    db 분리 필요
-    */
 
     //props 사용 불가능
     //-> Context APi 사용
@@ -24,6 +19,7 @@ function GetTag(props){
                 for (let i=0; i<rows.length; i++) {
                     tag.push({
                         ...rows.item(i),
+                        i
                     });
                 }
                 setTag(tag);
@@ -48,21 +44,36 @@ function GetTag(props){
     }, [props]);
 
     return(   
-        tag.map((item) => (
-            <TouchableOpacity key={item.tagNum} style={styles.button} onPress={()=> tagChangeHandler(item.tagName)}>
-                <Text key={item.tagNum}>{item.tagName}</Text>
-            </TouchableOpacity>    
+        tag.slice(0,5).map((item,index) => (
+            <View style={styles.tagcontainer}>
+                <TouchableOpacity key={item.tagNum} style={styles.button} onPress={()=> tagChangeHandler(item.tagName)}>
+                    <Text style={styles.buttontext} key={item.tagNum}>{item.tagName}</Text>
+                </TouchableOpacity> 
+            </View>
         ))
     )
 } 
 
 const styles = StyleSheet.create({
+    tagcontainer:{
+        flex :1,
+        flexWrap:'wrap',
+        flexDirection:'row',
+    },
     button:{
         width: 80,
-        backgroundColor: 'yellow',
+        backgroundColor: "darkslateblue",
         alignItems: 'center',
         justifyContent: 'center',
+        alignContent:'center',
         elevation:3,
+        borderRadius:10,
+        borderWidth:1
       },
+    buttontext:{
+        marginTop:10,
+        flexBasis:'50%',
+        color:"white"
+    }
 })
 export default GetTag
