@@ -2,11 +2,9 @@ import React, {useEffect, createContext, useContext,useState } from "react";
 import {API_KEY} from '@env'
 import axios from 'axios'
 import { LocationContext } from './CurrentLocation';
-import { useStateWithPromise } from "./useStateWithPromise";
 export const WeatherContext = createContext();
 
 export const CurrentWeather = (props)=>{
-    console.log("CurrentWeather 실행")
     const location = useContext(LocationContext);
     const [currentWeather, setCurrentWeather] = useState('');
     const [temp, setTemp] = useState('');
@@ -16,12 +14,7 @@ export const CurrentWeather = (props)=>{
     const [isLoading, setIsLoading] = useState(true);
     
 
-
-    
-
-
     const getWeather = async (lat, lon) => {
-      console.log("getWeather 실행")
       try {
         const resWeather = await axios.get(
           `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`,
@@ -46,10 +39,11 @@ export const CurrentWeather = (props)=>{
          setIsLoading(false);
       }
       }
-      getWeather(location.lat,location.lng)
+
     useEffect(()=>{
-        //getWeather(location.lat,location.lon)
-        console.log("UseEffect:"+currentWeather)
+
+        getWeather(location.lat,location.lng)
+
     })
 
     return(
