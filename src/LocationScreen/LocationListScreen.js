@@ -1,13 +1,9 @@
-import React, {useContext, useEffect, useState,useRef} from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   StyleSheet,
-  Button,
   Text,
-  TextInput,
   View,
   TouchableOpacity,
-  Image,
   ActivityIndicator
 } from 'react-native';
 import {API_KEY, GOOGLE_CUSTOM_API_KEY, SEARCH_ENGINE} from '@env'
@@ -19,18 +15,16 @@ function LocationListScreen({route,navigation}){
     const db = useContext(DBContext)
     const location = useContext(LocationContext)
     const {markerLocation} = route.params
+    const headerAddress = route.params
     const [forceRender, setForceRender] = useState(false)
     const [address, setAddress] = useState('')
-
+    
     const getAddress = async (lat, lng) => {
       const response = await fetch(
         'https://maps.googleapis.com/maps/api/geocode/json?address=' + lat + ',' + lng
         + '&key=' + GOOGLE_CUSTOM_API_KEY + '&language=ko');
       const json = await response.json();
-      //console.log(json.results[0].formatted_address)
-      //console.log(location.currentLat, location.currentLng)
       saveLocation(markerLocation, json.results[0].formatted_address)
-      //setMarkerAddress(json.results[0].formatted_address)
     };
 
     function saveLocation(location, address){
@@ -61,8 +55,8 @@ function LocationListScreen({route,navigation}){
                 tag.push({
                     ...rows.item(i),
                 });
-                console.log("asdsa",rows.item(i))
             }
+            console.log(tag)
             setAddress(tag);
         },
         (error)=>{
@@ -73,16 +67,20 @@ function LocationListScreen({route,navigation}){
       console.log(error);
     }
   }
-  const changeLocation=(lat, lng)=>{
+  const changeLocation=(lat, lng,address)=>{
     location.setlatitude(lat)
     location.setlongitude(lng)
+    headerAddress.setAddress(address)
   }
-  const deleteLocation = (lat, lng)=>{
+  const deleteLocation = (address)=>{
+    console.log("?",address)
     try{
       db.transaction((tx) => {
-        tx.executeSql(`DELETE FROM location where lat='`+lat+`' and lng='`+lng+`';`,
+        //tx.executeSql(`DELETE FROM location where lat='`+lat+`' and lng='`+lng+`';`,
+        tx.executeSql(`DELETE FROM location where address='`+address +`';`,
         [],  
         (tx, results) => {
+          console.log("dasf",results)
           getLocation()
         },
         (error)=>{
@@ -104,7 +102,7 @@ function LocationListScreen({route,navigation}){
     return(
         <View style={styles.screen}>
           <View style={styles.screen2}>
-          <TouchableOpacity onPress={()=>changeLocation(location.currentLat, location.currentLng)}>
+          <TouchableOpacity onPress={()=>changeLocation(location.currentLat, location.currentLng,location.currentAddress)}>
             <Text style={styles.locationtext}>현재 위치 : {location.currentAddress}</Text>
           </TouchableOpacity>
           </View>
@@ -114,15 +112,15 @@ function LocationListScreen({route,navigation}){
               </View>
           ):(
             address.map((item,index) => (
-              <View style={styles.addresscontainer}>
-                <View style={{flex:1}}>
-                <TouchableOpacity key={index} onPress={()=>changeLocation(item.lat,item.lng)}>
-                  <Text style={styles.locationtext}>{item.address}</Text>
+              <View  key={item.address} style={styles.addresscontainer}>
+                <View  key={item.address} style={{flex:1}}>
+                <TouchableOpacity key={item.address} onPress={()=>changeLocation(item.lat,item.lng,item.address)}>
+                  <Text key={item.address} style={styles.locationtext}>{item.address}</Text>
                 </TouchableOpacity>   
                 </View>
                 <View style={{marginRight:"auto"}}>
-                  <TouchableOpacity key={index} style={styles.icon}  onPress={()=>deleteLocation(item.lat,item.lng)}>
-                    <FontAwesome5 name="times" color={"white"} size={20}/>
+                  <TouchableOpacity key={item.address} style={styles.icon}  onPress={()=>deleteLocation(item.address)}>
+                    <FontAwesome5  key={item.address} name="times" color={"white"} size={20}/>
                   </TouchableOpacity>
                 </View>
               </View>
