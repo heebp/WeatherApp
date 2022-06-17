@@ -1,4 +1,4 @@
-import React, {useEffect, createContext, useState } from "react";
+import React, {useEffect, createContext, useState, useContext } from "react";
 import Geolocation, { PositionError } from 'react-native-geolocation-service';
 import {  Platform, PermissionsAndroid,} from "react-native"
 import {API_KEY, GOOGLE_CUSTOM_API_KEY, SEARCH_ENGINE} from '@env'
@@ -19,8 +19,7 @@ async function requestPermission() {
     } 
 }
 
-export const CurrentLocation = (props)=>{
-    console.log("CurrentLocation 실행");
+export const CurrentLocation = (props,route)=>{
     const [lat, setlatitude] = useState();
     const [lng, setlongitude] = useState();
     const [currentLat, setCurrentLat] = useState()
@@ -32,13 +31,12 @@ export const CurrentLocation = (props)=>{
         'https://maps.googleapis.com/maps/api/geocode/json?address=' + lat + ',' + lng
         + '&key=' + GOOGLE_CUSTOM_API_KEY + '&language=ko');
       const json = await response.json();
-      console.log(json.results[0].formatted_address)
+
       setCurrentAddress(json.results[0].formatted_address)
     };
 
     useEffect(() => {
         requestPermission().then(result => { 
-          console.log({ result });
          if (result === "granted") { 
            Geolocation.getCurrentPosition( 
              pos => { 
