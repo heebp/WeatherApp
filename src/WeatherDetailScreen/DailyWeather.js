@@ -1,4 +1,4 @@
-import React, {Component, useState, useContext} from 'react';
+import React, {Component, useState, useContext,useEffect} from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
   StyleSheet,
@@ -6,13 +6,14 @@ import {
   View,
   ActivityIndicator,
 } from 'react-native';
-import { useEffect } from 'react';
+import {useIsFocused } from '@react-navigation/native';
 import {API_KEY} from '@env'
 import { LocationContext } from '../Context/CurrentLocation';
-import WeatherIcon from './DetailScreenWeatherIcon';
+import WeatherIcon from '../assets/WeatherIcon';
 const Stack = createNativeStackNavigator();
 
 function DailyWeather(props) {
+const isFocused = useIsFocused()
 const location = useContext(LocationContext);
 const [days, setDays] = useState([]);
 const getForecastWeather = async (lat, lon) => {
@@ -22,7 +23,6 @@ const getForecastWeather = async (lat, lon) => {
   const json = await response.json();
   //console.log(json.daily)
   setDays(json.daily);
-
       
 };
 function getTodayLabel(time){
@@ -32,26 +32,25 @@ function getTodayLabel(time){
   return todayLabel;
 }
   useEffect(() => {
-    console.log("데일리 웨더 리렌더링")
     getForecastWeather(location.lat, location.lng);
-  }, []);
+  }, [isFocused]);
   
       return (
         <View style={styles.screen}>
           {days.length === 0 ? (
           <View>
-            {/* <ActivityIndicator
+            <ActivityIndicator
               color="white"
               style={{ marginTop: 10 }}
               size="large"
-            /> */}
+            /> 
           </View>
         ) : (
             <View style={styles.days}>{
            days.slice(0,7).map((day, index) => (
              <View key={index} style={styles.day}>
                 <Text style={styles.tinytext}>{getTodayLabel(day.dt*1000)}</Text> 
-                  <WeatherIcon value={day.weather[0].main}/>
+                  <WeatherIcon size={30} value={day.weather[0].main} color="white"/>
                 <Text style={styles.description}>
                   {day.weather[0].main}
                 </Text>
@@ -71,16 +70,19 @@ function getTodayLabel(time){
             flexDirection: "row",
         },
         day:{
-          width:50
+          width:58
         },
-        tinyText: {
-          fontSize: 1,
+        tinytext:{
+          color:"white",
         },
         high:{
           color:"red"
         },
         low:{
           color:"blue"
+        },
+        description:{
+          color:"white"
         }
     })
     export default DailyWeather
