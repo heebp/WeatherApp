@@ -1,5 +1,5 @@
-import React, {useEffect, createContext, useState, useContext } from "react";
-import Geolocation, { PositionError } from 'react-native-geolocation-service';
+import React, {useEffect, createContext, useState } from "react";
+import Geolocation from 'react-native-geolocation-service';
 import {  Platform, PermissionsAndroid,} from "react-native"
 import {API_KEY, GOOGLE_CUSTOM_API_KEY, SEARCH_ENGINE} from '@env'
 export const LocationContext = createContext();
@@ -19,7 +19,7 @@ async function requestPermission() {
     } 
 }
 
-export const CurrentLocation = (props,route)=>{
+export const CurrentLocation = (props)=>{
     const [lat, setlatitude] = useState();
     const [lng, setlongitude] = useState();
     const [currentLat, setCurrentLat] = useState()
