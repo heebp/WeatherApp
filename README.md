@@ -1,4 +1,5 @@
 ﻿# Coordination Recommend by Weather Application
 
- - project start
- npm start
+- project run
+
+npm start
